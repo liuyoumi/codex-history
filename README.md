@@ -27,3 +27,13 @@ codex-history purge --id <thread_id> --yes
 - Active threads must not be purged.
 - macOS is the first supported and verified platform.
 
+## Planning Docs
+
+- [Requirements](docs/requirements.md)
+- [CLI Spec](docs/cli-spec.md)
+- [Technical Design](docs/technical-design.md)
+- [Deletion Scope](docs/deletion-scope.md)
+- [Safety Checklist](docs/safety-checklist.md)
+- [Release Plan](docs/release-plan.md)
+- [Acceptance Criteria](docs/acceptance-criteria.md)
+- [Implementation Plan](docs/implementation-plan.md)

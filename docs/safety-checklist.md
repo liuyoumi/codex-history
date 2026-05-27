@@ -7,10 +7,12 @@
 - [ ] Default to dry-run.
 - [ ] Require `--yes` for destructive execution.
 - [ ] Refuse to purge active thread.
+- [ ] Refuse fuzzy destructive deletion.
 - [ ] Validate SQLite schema.
 - [ ] Validate JSON file shapes.
 - [ ] Build complete purge plan before changing anything.
-- [ ] Create backup unless user explicitly disables it.
+- [ ] Create backup.
+- [ ] Refuse purge when backup creation fails.
 
 ## During Purge
 
@@ -19,6 +21,7 @@
 - [ ] Use structural JSON parsing and writing.
 - [ ] Stop on unexpected schema or parse failure.
 - [ ] Keep a machine-readable operation report.
+- [ ] Checkpoint SQLite WAL files after mutation.
 
 ## After Purge
 
@@ -28,3 +31,11 @@
 - [ ] Print any remaining references.
 - [ ] Exit non-zero if verification fails.
 
+## Release Gate
+
+- [ ] `npm run typecheck` passes.
+- [ ] `npm run build` passes.
+- [ ] Tests pass against fixtures.
+- [ ] README includes risk disclaimer.
+- [ ] README documents that server-side deletion is not guaranteed.
+- [ ] macOS manual verification notes are recorded.

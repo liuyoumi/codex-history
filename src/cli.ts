@@ -5,6 +5,7 @@ import { listCommand } from "./commands/list.js";
 import { purgeCommand } from "./commands/purge.js";
 import { searchCommand } from "./commands/search.js";
 import { CodexHistoryError } from "./core/errors.js";
+import type { PurgeExecutionReport } from "./core/executor.js";
 import { formatDate, printOutput, shortId, type OutputMode } from "./core/output.js";
 import { resolvePaths } from "./core/paths.js";
 import type { ContainsResolution, PurgePlan } from "./core/planner.js";
@@ -160,7 +161,7 @@ function formatThreads(threads: ThreadSummary[]): unknown {
     .join("\n\n");
 }
 
-function formatPurgeResult(result: PurgePlan | ContainsResolution): unknown {
+function formatPurgeResult(result: PurgePlan | ContainsResolution | PurgeExecutionReport): unknown {
   if (currentOutputMode() === "json") {
     return result;
   }
@@ -171,6 +172,40 @@ function formatPurgeResult(result: PurgePlan | ContainsResolution): unknown {
       "",
       formatThreads(result.matches),
     ].join("\n");
+  }
+
+  if (result.mode === "executed") {
+    const lines = [
+      "Purge executed.",
+      "",
+      `Target: ${result.plan.target.title || "(untitled)"}`,
+      `Thread id: ${result.plan.target.id}`,
+      `Backup: ${result.backup.backupDir}`,
+      "",
+      "SQLite changes:",
+      ...result.sqlite.map((change) => `- ${change.store}: ${change.changedRows} row(s)`),
+      "",
+      "JSON changes:",
+      ...result.json.map((change) => `- ${change.changed ? "changed" : "unchanged"}: ${change.path}`),
+      "",
+      "File changes:",
+      ...result.files.map((change) => `- ${change.deleted ? "deleted" : "missing"}: ${change.path}`),
+      "",
+      `Verification: ${result.verification.success ? "passed" : "failed"}`,
+    ];
+
+    if (result.verification.remainingReferences.length > 0) {
+      lines.push(
+        "",
+        "Remaining references:",
+        ...result.verification.remainingReferences.map(
+          (reference) => `- ${reference.store}: ${reference.path} (${reference.detail})`,
+        ),
+      );
+      process.exitCode = 1;
+    }
+
+    return lines.join("\n");
   }
 
   const lines = [

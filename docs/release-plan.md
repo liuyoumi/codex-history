@@ -56,10 +56,11 @@ Required features:
 
 Exit criteria:
 
-- destructive tests use fixtures only
-- active-thread protection exists
-- `purge --yes` requires exact unique target
-- verification failures exit non-zero
+- [x] destructive tests use fixtures only
+- [x] active-thread protection exists
+- [x] `purge --yes` requires exact unique target
+- [x] verification failures exit non-zero
+- [ ] macOS manual verification against a disposable Codex home
 
 ## Milestone 4: First Release
 

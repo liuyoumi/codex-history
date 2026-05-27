@@ -1,5 +1,6 @@
 import type { ResolvedPaths } from "../core/paths.js";
 import { SafetyRefusalError } from "../core/errors.js";
+import { executePurge } from "../core/executor.js";
 import { buildDryRunPurgePlan, resolvePurgeTarget, type PurgeTargetInput } from "../core/planner.js";
 import { validateSupportedDataModel } from "../core/schema.js";
 
@@ -18,7 +19,7 @@ export function purgeCommand(paths: ResolvedPaths, input: PurgeTargetInput, exec
   const plan = buildDryRunPurgePlan(paths, target);
 
   if (execute) {
-    throw new SafetyRefusalError("purge --yes is blocked until feat/purge-safety.");
+    return executePurge(paths, plan);
   }
 
   return plan;

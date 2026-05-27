@@ -2,7 +2,7 @@
 
 Terminal tool for inspecting and safely purging local Codex conversation history.
 
-> Status: planning and foundation stage. The first implementation milestone is docs-first and macOS-focused.
+> Status: v0.1 implementation in progress. The CLI supports local discovery, dry-run planning, and guarded purge execution with mandatory backups.
 
 ## Package
 
@@ -19,6 +19,8 @@ codex-history purge --id <thread_id> --dry-run
 codex-history purge --id <thread_id> --yes
 ```
 
+`purge --yes` is destructive. It creates a backup first, refuses active-thread matches, mutates supported local Codex stores, and verifies remaining supported references.
+
 ## Project Rules
 
 - Documentation must be finalized and reviewed before purge execution is implemented.
@@ -26,6 +28,7 @@ codex-history purge --id <thread_id> --yes
 - `dry-run` is the default behavior for destructive operations.
 - Active threads must not be purged.
 - macOS is the first supported and verified platform.
+- Backups are mandatory before purge execution.
 
 ## Planning Docs
 

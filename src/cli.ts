@@ -12,12 +12,14 @@ import type { ContainsResolution, PurgePlan } from "./core/planner.js";
 import type { DoctorReport } from "./core/schema.js";
 import type { ThreadSummary } from "./core/threads.js";
 
+const TITLE_MAX_LENGTH = 80;
+
 const program = new Command();
 
 program
   .name("codex-history")
   .description("Inspect and safely purge local Codex conversation history.")
-  .version("0.0.0")
+  .version("0.1.0")
   .option("--codex-home <path>", "Path to Codex home directory", "~/.codex")
   .option("--json", "Print machine-readable JSON output");
 
@@ -149,7 +151,7 @@ function formatDoctor(report: DoctorReport): unknown {
 
 function formatThreads(threads: ThreadSummary[]): unknown {
   if (currentOutputMode() === "json") {
-    return { count: threads.length, threads };
+    return { count: threads.length, threads: threads.map(toPublicThread) };
   }
 
   if (threads.length === 0) {
@@ -159,7 +161,7 @@ function formatThreads(threads: ThreadSummary[]): unknown {
   return threads
     .map((thread) =>
       [
-        `${shortId(thread.id)}  ${thread.title || "(untitled)"}`,
+        `${shortId(thread.id)}  ${displayTitle(thread.title)}`,
         `  id: ${thread.id}`,
         `  updated: ${formatDate(thread.updatedAtMs)}`,
         `  cwd: ${thread.cwd}`,
@@ -171,7 +173,7 @@ function formatThreads(threads: ThreadSummary[]): unknown {
 
 function formatPurgeResult(result: PurgePlan | ContainsResolution | PurgeExecutionReport): unknown {
   if (currentOutputMode() === "json") {
-    return result;
+    return sanitizePurgeResult(result);
   }
 
   if ("kind" in result) {
@@ -186,7 +188,7 @@ function formatPurgeResult(result: PurgePlan | ContainsResolution | PurgeExecuti
     const lines = [
       "Purge executed.",
       "",
-      `Target: ${result.plan.target.title || "(untitled)"}`,
+      `Target: ${displayTitle(result.plan.target.title)}`,
       `Thread id: ${result.plan.target.id}`,
       `Backup: ${result.backup.backupDir}`,
       "",
@@ -219,7 +221,7 @@ function formatPurgeResult(result: PurgePlan | ContainsResolution | PurgeExecuti
   const lines = [
     "Dry-run purge plan. No local Codex data was modified.",
     "",
-    `Target: ${result.target.title || "(untitled)"}`,
+    `Target: ${displayTitle(result.target.title)}`,
     `Thread id: ${result.target.id}`,
     `Updated: ${formatDate(result.target.updatedAtMs)}`,
     `CWD: ${result.target.cwd}`,
@@ -237,4 +239,55 @@ function formatPurgeResult(result: PurgePlan | ContainsResolution | PurgeExecuti
   }
 
   return lines.join("\n");
+}
+
+function displayTitle(title: string): string {
+  const normalized = title.trim().replaceAll(/\s+/g, " ");
+  if (!normalized) {
+    return "(untitled)";
+  }
+
+  if (normalized.length <= TITLE_MAX_LENGTH) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, TITLE_MAX_LENGTH - 3)}...`;
+}
+
+function toPublicThread(thread: ThreadSummary) {
+  return {
+    id: thread.id,
+    title: displayTitle(thread.title),
+    titleTruncated: thread.title.trim().replaceAll(/\s+/g, " ").length > TITLE_MAX_LENGTH,
+    rolloutPath: thread.rolloutPath,
+    createdAtMs: thread.createdAtMs,
+    updatedAtMs: thread.updatedAtMs,
+    cwd: thread.cwd,
+    archived: thread.archived,
+  };
+}
+
+function sanitizePurgeResult(result: PurgePlan | ContainsResolution | PurgeExecutionReport): unknown {
+  if ("kind" in result) {
+    return {
+      kind: result.kind,
+      matches: result.matches.map(toPublicThread),
+    };
+  }
+
+  if (result.mode === "executed") {
+    return {
+      ...result,
+      plan: sanitizePurgePlan(result.plan),
+    };
+  }
+
+  return sanitizePurgePlan(result);
+}
+
+function sanitizePurgePlan(plan: PurgePlan) {
+  return {
+    ...plan,
+    target: toPublicThread(plan.target),
+  };
 }

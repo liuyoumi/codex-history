@@ -28,6 +28,8 @@ codex-history purge --id <thread_id> --yes
 
 `purge --yes` is destructive. It creates a backup first, refuses active-thread matches, mutates supported local Codex stores, and verifies remaining supported references.
 
+`list` and `search` show compact one-line titles. Long Codex titles are truncated with `...`; prompt bodies are not printed.
+
 ## Typical Workflow
 
 ```bash

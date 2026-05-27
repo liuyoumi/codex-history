@@ -3,7 +3,7 @@ import path from "node:path";
 import { SafetyRefusalError, UsageError } from "./errors.js";
 import type { ResolvedPaths } from "./paths.js";
 import type { ThreadSummary } from "./threads.js";
-import { getThreadById, getThreadsByExactTitle, searchThreads } from "./threads.js";
+import { getThreadsByExactTitle, getThreadsByIdPrefix, searchThreads } from "./threads.js";
 import { countWhereThreadId, openReadonlyDatabase, tableExists } from "../stores/sqlite.js";
 
 export type PurgeTargetInput = {
@@ -50,11 +50,16 @@ export function resolvePurgeTarget(
   }
 
   if (input.id) {
-    const thread = getThreadById(paths, input.id);
-    if (!thread) {
+    const matches = getThreadsByIdPrefix(paths, input.id);
+    if (matches.length === 0) {
       throw new UsageError(`No Codex thread found for id: ${input.id}`);
     }
-    return thread;
+    if (matches.length > 1) {
+      throw new SafetyRefusalError(
+        `ID prefix matched ${matches.length} threads. Use a longer id prefix or full id.`,
+      );
+    }
+    return matches[0];
   }
 
   if (input.title) {

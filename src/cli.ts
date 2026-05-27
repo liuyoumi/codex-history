@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { Command } from "commander";
+import { spawnSync } from "node:child_process";
 import { doctorCommand } from "./commands/doctor.js";
 import { listCommand } from "./commands/list.js";
 import { purgeCommand } from "./commands/purge.js";
@@ -13,6 +14,7 @@ import type { DoctorReport } from "./core/schema.js";
 import type { ThreadSummary } from "./core/threads.js";
 
 const TITLE_MAX_LENGTH = 80;
+type PrettyFormat = "oneline" | "medium" | "full";
 
 const program = new Command();
 
@@ -39,10 +41,12 @@ program
 program
   .command("list")
   .description("List local Codex conversations.")
-  .option("--limit <number>", "Maximum rows to show", parseInteger, 20)
+  .option("--limit <number>", "Maximum rows to show", parseInteger)
   .option("--all", "Include archived and non-archived threads")
   .option("--archived", "Show archived threads")
   .option("--cwd <path>", "Filter by exact working directory")
+  .option("--pretty <format>", "Output format: oneline, medium, full", parsePretty, "oneline")
+  .option("--no-pager", "Disable pager output")
   .action((options) =>
     runCommand(() =>
       formatThreads(
@@ -52,6 +56,8 @@ program
           archived: options.archived,
           cwd: options.cwd,
         }),
+        options.pretty,
+        shouldUsePager(options),
       ),
     ),
   );
@@ -60,9 +66,11 @@ program
   .command("search")
   .argument("<keyword>", "Title or prompt keyword to search for")
   .description("Search local Codex conversations.")
-  .option("--limit <number>", "Maximum rows to scan/show", parseInteger, 200)
+  .option("--limit <number>", "Maximum rows to scan/show", parseInteger)
   .option("--all", "Include archived and non-archived threads")
   .option("--archived", "Show archived threads")
+  .option("--pretty <format>", "Output format: oneline, medium, full", parsePretty, "oneline")
+  .option("--no-pager", "Disable pager output")
   .action((keyword: string, options) =>
     runCommand(() =>
       formatThreads(
@@ -71,6 +79,8 @@ program
           all: options.all,
           archived: options.archived,
         }),
+        options.pretty,
+        shouldUsePager(options),
       ),
     ),
   );
@@ -134,6 +144,22 @@ function parseInteger(value: string): number {
   return parsed;
 }
 
+function parsePretty(value: string): PrettyFormat {
+  if (value === "oneline" || value === "medium" || value === "full") {
+    return value;
+  }
+
+  throw new Error(`Expected pretty format oneline, medium, or full; got: ${value}`);
+}
+
+function shouldUsePager(options: { limit?: number; pager?: boolean }): boolean {
+  return Boolean(options.pager && options.limit === undefined && process.stdout.isTTY && !currentOutputModeIsJson());
+}
+
+function currentOutputModeIsJson(): boolean {
+  return currentOutputMode() === "json";
+}
+
 function formatDoctor(report: DoctorReport): unknown {
   if (currentOutputMode() === "json") {
     return report;
@@ -149,7 +175,7 @@ function formatDoctor(report: DoctorReport): unknown {
   return lines.join("\n");
 }
 
-function formatThreads(threads: ThreadSummary[]): unknown {
+function formatThreads(threads: ThreadSummary[], pretty: PrettyFormat = "oneline", usePager = false): unknown {
   if (currentOutputMode() === "json") {
     return { count: threads.length, threads: threads.map(toPublicThread) };
   }
@@ -158,17 +184,49 @@ function formatThreads(threads: ThreadSummary[]): unknown {
     return "No Codex conversations found.";
   }
 
-  return threads
-    .map((thread) =>
-      [
-        `${shortId(thread.id)}  ${displayTitle(thread.title)}`,
-        `  id: ${thread.id}`,
-        `  updated: ${formatDate(thread.updatedAtMs)}`,
-        `  cwd: ${thread.cwd}`,
-        `  rollout: ${thread.rolloutPath}`,
-      ].join("\n"),
-    )
-    .join("\n\n");
+  const text = threads.map((thread) => formatThread(thread, pretty)).join(pretty === "oneline" ? "\n" : "\n\n");
+  return usePager ? pageText(text) : text;
+}
+
+function formatThread(thread: ThreadSummary, pretty: PrettyFormat): string {
+  const header = `${shortId(thread.id)}  ${displayTitle(thread.title)}`;
+
+  if (pretty === "oneline") {
+    return header;
+  }
+
+  const mediumLines = [
+    header,
+    `  id: ${thread.id}`,
+    `  updated: ${formatDate(thread.updatedAtMs)}`,
+    `  cwd: ${thread.cwd}`,
+  ];
+
+  if (pretty === "medium") {
+    return mediumLines.join("\n");
+  }
+
+  return [
+    ...mediumLines,
+    `  created: ${formatDate(thread.createdAtMs)}`,
+    `  archived: ${thread.archived}`,
+    `  rollout: ${thread.rolloutPath}`,
+  ].join("\n");
+}
+
+function pageText(text: string): string {
+  const pager = process.env.PAGER || "less";
+  const result = spawnSync(pager, [], {
+    input: text,
+    stdio: ["pipe", "inherit", "inherit"],
+    encoding: "utf8",
+  });
+
+  if (result.error) {
+    return text;
+  }
+
+  return "";
 }
 
 function formatPurgeResult(result: PurgePlan | ContainsResolution | PurgeExecutionReport): unknown {

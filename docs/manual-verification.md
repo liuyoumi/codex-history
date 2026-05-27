@@ -18,6 +18,9 @@ npm run build
 NPM_CONFIG_CACHE=/private/tmp/codex-history-npm-cache npm pack --dry-run
 node dist/cli.js doctor
 node dist/cli.js list --limit 3
+node dist/cli.js list --limit 3 --pretty=medium
+node dist/cli.js list --limit 1 --pretty=full
+node dist/cli.js purge --id 019e6885
 CODEX_HISTORY_HOME=/private/tmp/codex-history-home node dist/cli.js doctor
 CODEX_HISTORY_HOME=/private/tmp/codex-history-home node dist/cli.js purge --id definitely-not-a-real-thread --yes
 ```
@@ -38,5 +41,8 @@ Result:
 - `NPM_CONFIG_CACHE=/private/tmp/codex-history-npm-cache npm pack --dry-run`: passed.
 - `node dist/cli.js doctor`: failed safely because the current sandbox cannot create `/Users/lg/.codex-history`.
 - `node dist/cli.js list --limit 3`: passed.
+- `node dist/cli.js list --limit 3 --pretty=medium`: passed.
+- `node dist/cli.js list --limit 1 --pretty=full`: passed.
+- `node dist/cli.js purge --id 019e6885`: passed as dry-run and resolved the short id.
 - `CODEX_HISTORY_HOME=/private/tmp/codex-history-home node dist/cli.js doctor`: passed.
 - `CODEX_HISTORY_HOME=/private/tmp/codex-history-home node dist/cli.js purge --id definitely-not-a-real-thread --yes`: failed safely with "No Codex thread found".

@@ -58,6 +58,16 @@ describe("mvp commands", () => {
     }
   });
 
+  it("resolves a unique short id prefix for purge", () => {
+    const fixture = createCodexFixture();
+    const plan = purgeCommand(fixture.paths, { id: "thread-1".slice(0, 8) }, false);
+
+    expect("mode" in plan && plan.mode).toBe("dry-run");
+    if ("mode" in plan && plan.mode === "dry-run") {
+      expect(plan.target.id).toBe("thread-1");
+    }
+  });
+
   it("refuses duplicate exact-title purge resolution", () => {
     const fixture = createCodexFixture();
 

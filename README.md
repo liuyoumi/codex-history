@@ -21,14 +21,15 @@ npx @asjk/codex-history doctor
 ```bash
 codex-history doctor
 codex-history list
+codex-history list --pretty=medium
 codex-history search "keyword"
-codex-history purge --id <thread_id> --dry-run
-codex-history purge --id <thread_id> --yes
+codex-history purge --id <short_or_full_thread_id> --dry-run
+codex-history purge --id <short_or_full_thread_id> --yes
 ```
 
 `purge --yes` is destructive. It creates a backup first, refuses active-thread matches, mutates supported local Codex stores, and verifies remaining supported references.
 
-`list` and `search` show the same compact conversation names Codex uses in its history list when available. Long fallback titles are truncated with `...`; prompt bodies are not printed.
+`list` and `search` default to one-line output, similar to `git log --oneline`. They show the same compact conversation names Codex uses in its history list when available. Long fallback titles are truncated with `...`; prompt bodies are not printed.
 
 ## Typical Workflow
 
@@ -40,6 +41,20 @@ codex-history purge --id <thread_id> --yes
 ```
 
 `purge` without `--yes` is a dry run.
+
+Short ids from `list` can be used with `purge` as long as the prefix uniquely identifies one thread.
+
+## Output Formats
+
+```bash
+codex-history list --pretty=oneline
+codex-history list --pretty=medium
+codex-history list --pretty=full
+```
+
+`oneline` is the default. `medium` adds full id, update time, and cwd. `full` also adds creation time, archive state, and rollout path.
+
+When `list` or `search` runs in an interactive terminal without `--limit`, output is sent through the system pager. Use `--no-pager` to disable that.
 
 ## Targeting a Custom Codex Home
 

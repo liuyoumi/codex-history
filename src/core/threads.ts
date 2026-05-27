@@ -99,18 +99,28 @@ export function searchThreads(
 }
 
 export function getThreadById(paths: ResolvedPaths, threadId: string): ThreadSummary | null {
+  const idMatches = getThreadsByIdPrefix(paths, threadId);
+  if (idMatches.length !== 1) {
+    return null;
+  }
+
+  return idMatches[0];
+}
+
+export function getThreadsByIdPrefix(paths: ResolvedPaths, idPrefix: string): ThreadSummary[] {
   const sessionIndex = readSessionIndex(paths.sessionIndex);
   const db = openReadonlyDatabase(paths.stateDb);
   try {
-    const row = db
+    const rows = db
       .prepare(
         `select id, title, rollout_path, created_at, updated_at, created_at_ms, updated_at_ms, cwd, archived, first_user_message, preview
          from threads
-         where id = ?`,
+         where id like ?
+         order by coalesce(updated_at_ms, updated_at * 1000) desc, id desc`,
       )
-      .get(threadId) as ThreadRow | undefined;
+      .all(`${escapeLike(idPrefix)}%`) as ThreadRow[];
 
-    return row ? mapThreadRow(row, sessionIndex) : null;
+    return rows.map((row) => mapThreadRow(row, sessionIndex));
   } finally {
     db.close();
   }
@@ -150,4 +160,8 @@ function mapThreadRow(row: ThreadRow, sessionIndex: Map<string, { threadName: st
     firstUserMessage: row.first_user_message,
     preview: row.preview,
   };
+}
+
+function escapeLike(value: string): string {
+  return value.replaceAll("\\", "\\\\").replaceAll("%", "\\%").replaceAll("_", "\\_");
 }

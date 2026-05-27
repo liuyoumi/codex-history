@@ -5,7 +5,7 @@ import { buildDryRunPurgePlan, resolvePurgeTarget, type PurgeTargetInput } from 
 import { validateSupportedDataModel } from "../core/schema.js";
 
 export function purgeCommand(paths: ResolvedPaths, input: PurgeTargetInput, execute: boolean) {
-  validateSupportedDataModel(paths);
+  validateSupportedDataModel(paths, { requireBackupHome: execute });
   const target = resolvePurgeTarget(paths, input);
 
   if ("kind" in target) {

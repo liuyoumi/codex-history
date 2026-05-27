@@ -75,3 +75,12 @@ Required features:
 Version:
 
 - `0.1.0`
+
+Status:
+
+- [x] npm package metadata
+- [x] README install and usage
+- [x] risk disclaimer
+- [x] changelog
+- [x] macOS manual verification notes
+- [x] final verification commands

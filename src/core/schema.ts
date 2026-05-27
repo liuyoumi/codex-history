@@ -54,9 +54,14 @@ export function runDoctor(paths: ResolvedPaths): DoctorReport {
   };
 }
 
-export function validateSupportedDataModel(paths: ResolvedPaths): void {
+export function validateSupportedDataModel(
+  paths: ResolvedPaths,
+  options: { requireBackupHome?: boolean } = {},
+): void {
   const report = runDoctor(paths);
-  const errors = report.checks.filter((check) => check.status === "error");
+  const errors = report.checks.filter(
+    (check) => check.status === "error" && (options.requireBackupHome || check.name !== "backup_home"),
+  );
 
   if (errors.length > 0) {
     const details = errors.map((check) => `${check.name}: ${check.detail}`).join("; ");

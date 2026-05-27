@@ -2,7 +2,7 @@
 
 Terminal tool for inspecting and safely purging local Codex conversation history.
 
-> Status: v0.1 implementation in progress. The CLI supports local discovery, dry-run planning, and guarded purge execution with mandatory backups.
+> Status: v0.1 release candidate. The CLI supports local discovery, dry-run planning, and guarded purge execution with mandatory backups.
 
 ## Package
 
@@ -10,9 +10,16 @@ Terminal tool for inspecting and safely purging local Codex conversation history
 npm install -g @asjk/codex-history
 ```
 
+Or run without installing:
+
+```bash
+npx @asjk/codex-history doctor
+```
+
 ## CLI
 
 ```bash
+codex-history doctor
 codex-history list
 codex-history search "keyword"
 codex-history purge --id <thread_id> --dry-run
@@ -20,6 +27,53 @@ codex-history purge --id <thread_id> --yes
 ```
 
 `purge --yes` is destructive. It creates a backup first, refuses active-thread matches, mutates supported local Codex stores, and verifies remaining supported references.
+
+## Typical Workflow
+
+```bash
+codex-history doctor
+codex-history search "conversation title"
+codex-history purge --id <thread_id>
+codex-history purge --id <thread_id> --yes
+```
+
+`purge` without `--yes` is a dry run.
+
+## Targeting a Custom Codex Home
+
+Use `--codex-home` for testing against a disposable copy:
+
+```bash
+codex-history --codex-home /tmp/codex-home doctor
+codex-history --codex-home /tmp/codex-home purge --id <thread_id> --yes
+```
+
+## JSON Output
+
+```bash
+codex-history --json list
+codex-history --json purge --id <thread_id>
+```
+
+## Safety and Limits
+
+This tool only works on local Codex data stores on your machine.
+
+It does not claim to delete:
+
+- OpenAI or Codex server-side records
+- OS backups, APFS snapshots, or Time Machine backups
+- terminal scrollback
+- user-created transcript copies
+- crash reports or unrelated app caches
+
+Before executing purge, the tool:
+
+- validates the local Codex data model
+- resolves the target to exactly one thread
+- creates a mandatory backup under `~/.codex-history/backups`
+- refuses the currently active thread when detectable
+- verifies supported local stores after mutation
 
 ## Project Rules
 
@@ -29,6 +83,15 @@ codex-history purge --id <thread_id> --yes
 - Active threads must not be purged.
 - macOS is the first supported and verified platform.
 - Backups are mandatory before purge execution.
+
+## Development
+
+```bash
+npm install
+npm run typecheck
+npm test
+npm run build
+```
 
 ## Planning Docs
 

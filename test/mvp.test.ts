@@ -34,15 +34,16 @@ describe("mvp commands", () => {
 
     expect(threads).toHaveLength(3);
     expect(threads[0]?.id).toBe("thread-3");
+    expect(threads.find((thread) => thread.id === "thread-2")?.title).toBe("Keep Me");
   });
 
-  it("searches thread title and prompt fields", () => {
+  it("searches displayed thread titles without matching prompt bodies", () => {
     const fixture = createCodexFixture();
     const titleMatches = searchCommand(fixture.paths, "Keep", { all: true });
     const promptMatches = searchCommand(fixture.paths, "please delete", { all: true });
 
     expect(titleMatches.map((thread) => thread.id)).toEqual(["thread-2"]);
-    expect(promptMatches.map((thread) => thread.id)).toContain("thread-1");
+    expect(promptMatches).toHaveLength(0);
   });
 
   it("builds a dry-run purge plan by id", () => {

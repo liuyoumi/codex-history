@@ -1,0 +1,30 @@
+# Safety Checklist
+
+## Before Purge
+
+- [ ] Resolve user input to exactly one thread id.
+- [ ] Show title, cwd, updated time, and rollout path.
+- [ ] Default to dry-run.
+- [ ] Require `--yes` for destructive execution.
+- [ ] Refuse to purge active thread.
+- [ ] Validate SQLite schema.
+- [ ] Validate JSON file shapes.
+- [ ] Build complete purge plan before changing anything.
+- [ ] Create backup unless user explicitly disables it.
+
+## During Purge
+
+- [ ] Use SQLite transactions.
+- [ ] Avoid broad recursive deletion.
+- [ ] Use structural JSON parsing and writing.
+- [ ] Stop on unexpected schema or parse failure.
+- [ ] Keep a machine-readable operation report.
+
+## After Purge
+
+- [ ] Run WAL checkpoints.
+- [ ] Optionally run `VACUUM`.
+- [ ] Verify supported stores no longer reference the target thread id.
+- [ ] Print any remaining references.
+- [ ] Exit non-zero if verification fails.
+

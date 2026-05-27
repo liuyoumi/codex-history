@@ -15,6 +15,16 @@
 - matching rows in `goals_1.sqlite.thread_goals`
 - matching shell snapshots in `~/.codex/shell_snapshots`
 
+## Preserve
+
+- authentication files such as `auth.json`
+- user config such as `config.toml`
+- plugin, skill, and browser configuration
+- unrelated conversations
+- unrelated shell snapshots
+- unrelated logs
+- tool-generated backups
+
 ## Explicitly Not Guaranteed
 
 - OpenAI or Codex server-side records
@@ -36,3 +46,4 @@ After purge, the tool should verify:
 
 The tool should report any remaining references with file paths, not silently ignore them.
 
+Verification should scan supported stores only. It should not recursively search the entire home directory by default.

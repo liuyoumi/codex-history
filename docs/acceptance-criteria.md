@@ -32,16 +32,18 @@ The `feat/history-cli-mvp` milestone is complete when:
 
 The `feat/purge-safety` milestone is complete when:
 
-- `purge --yes` requires a unique target
-- backup is mandatory and includes a manifest
-- schema validation runs before mutation
-- active-thread protection runs before mutation
-- SQLite mutations use transactions
-- JSON mutations use structural parsing
-- WAL checkpointing runs after SQLite mutation
-- verification runs after purge
-- verification failure exits non-zero
-- destructive tests run only against temporary fixtures
+- [x] `purge --yes` requires a unique target
+- [x] backup is mandatory and includes a manifest
+- [x] schema validation runs before mutation
+- [x] active-thread protection runs before mutation
+- [x] SQLite mutations use transactions
+- [x] JSON mutations use structural parsing
+- [x] WAL checkpointing runs after SQLite mutation
+- [x] verification runs after purge
+- [x] verification failure exits non-zero
+- [x] destructive tests run only against temporary fixtures
+
+Current status: implemented in `feat/purge-safety`; pending broader manual verification before release.
 
 ## Release Gate
 
@@ -52,4 +54,3 @@ The `release/v0.1.0` milestone is complete when:
 - package metadata is ready for npm
 - macOS manual verification is recorded
 - GitHub repository has a release branch
-

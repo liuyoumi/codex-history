@@ -8,6 +8,12 @@ export function openReadonlyDatabase(filePath: string): Database.Database {
   });
 }
 
+export function openWritableDatabase(filePath: string): Database.Database {
+  return new Database(filePath, {
+    fileMustExist: true,
+  });
+}
+
 export function sqliteFileExists(filePath: string): boolean {
   return existsSync(filePath);
 }
@@ -58,3 +64,15 @@ export function quoteIdentifier(value: string): string {
   return `"${value.replaceAll('"', '""')}"`;
 }
 
+export function checkpointWal(filePath: string): void {
+  if (!sqliteFileExists(filePath)) {
+    return;
+  }
+
+  const db = openWritableDatabase(filePath);
+  try {
+    db.pragma("wal_checkpoint(TRUNCATE)");
+  } finally {
+    db.close();
+  }
+}

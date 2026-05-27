@@ -24,7 +24,15 @@ program
 program
   .command("doctor")
   .description("Check whether the local Codex data model is supported.")
-  .action(() => runCommand(() => formatDoctor(doctorCommand(currentPaths()))));
+  .action(() =>
+    runCommand(() => {
+      const report = doctorCommand(currentPaths());
+      if (!report.supported) {
+        process.exitCode = 1;
+      }
+      return formatDoctor(report);
+    }),
+  );
 
 program
   .command("list")

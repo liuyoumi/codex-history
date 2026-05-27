@@ -22,6 +22,8 @@ Exit criteria:
 - technical design reviewed
 - CLI spec reviewed
 - safety checklist reviewed
+- acceptance criteria reviewed
+- implementation plan reviewed
 
 ## Milestone 2: Non-Destructive CLI
 
@@ -33,6 +35,7 @@ Required features:
 - purge plan builder
 - JSON output
 - fixture test harness
+- `--codex-home` support
 
 Exit criteria:
 
@@ -49,6 +52,7 @@ Required features:
 - JSON and JSONL structural mutations
 - rollout and shell snapshot deletion
 - verification
+- mandatory `--yes` execution guard
 
 Exit criteria:
 
@@ -70,4 +74,3 @@ Required features:
 Version:
 
 - `0.1.0`
-

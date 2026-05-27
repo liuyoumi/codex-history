@@ -35,3 +35,5 @@ codex-history purge --id <thread_id> --yes
 - [Deletion Scope](docs/deletion-scope.md)
 - [Safety Checklist](docs/safety-checklist.md)
 - [Release Plan](docs/release-plan.md)
+- [Acceptance Criteria](docs/acceptance-criteria.md)
+- [Implementation Plan](docs/implementation-plan.md)

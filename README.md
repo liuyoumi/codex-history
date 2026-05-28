@@ -133,6 +133,7 @@ codex-history --json purge 019e6885 --force
 
 - `--codex-home` defaults to `~/.codex`.
 - `--json` prints machine-readable output. For `purge`, JSON output requires `--force` because interactive confirmation is text-only.
+- Color is enabled only in interactive terminals and respects `NO_COLOR`.
 
 ## Safety
 

@@ -15,6 +15,7 @@ import type { ThreadSummary } from "./core/threads.js";
 
 const TITLE_MAX_LENGTH = 80;
 type PrettyFormat = "oneline" | "medium" | "full";
+type ColorName = "cyan" | "dim" | "green" | "red" | "yellow";
 
 const program = new Command();
 
@@ -106,7 +107,7 @@ async function runCommand(produce: () => unknown | Promise<unknown>): Promise<vo
     if (currentOutputMode() === "json") {
       console.error(JSON.stringify({ error: message, exitCode }, null, 2));
     } else {
-      console.error(`Error: ${message}`);
+      console.error(`${colorizeError("red", "Error:")} ${message}`);
     }
 
     process.exitCode = exitCode;
@@ -151,7 +152,7 @@ async function confirmPurge(plan: PurgePlan): Promise<void> {
   });
 
   try {
-    const answer = await readline.question(`Type ${expected} to confirm: `);
+    const answer = await readline.question(`Type ${colorize("cyan", expected)} to confirm: `);
     if (answer.trim() !== expected) {
       throw new SafetyRefusalError("Confirmation did not match. No local Codex data was modified.");
     }
@@ -166,10 +167,12 @@ function formatDoctor(report: DoctorReport): unknown {
   }
 
   const lines = [
-    `Codex home: ${report.codexHome}`,
-    `Supported: ${report.supported ? "yes" : "no"}`,
+    `${colorize("dim", "Codex home:")} ${colorize("dim", report.codexHome)}`,
+    `${colorize("dim", "Supported:")} ${report.supported ? colorize("green", "yes") : colorize("red", "no")}`,
     "",
-    ...report.checks.map((check) => `${check.status.toUpperCase().padEnd(7)} ${check.name}: ${check.detail}`),
+    ...report.checks.map(
+      (check) => `${formatCheckStatus(check.status)} ${check.name}: ${check.detail}`,
+    ),
   ];
 
   return lines.join("\n");
@@ -189,7 +192,7 @@ function formatThreads(threads: ThreadSummary[], pretty: PrettyFormat = "oneline
 }
 
 function formatThread(thread: ThreadSummary, pretty: PrettyFormat): string {
-  const header = `${shortId(thread.id)}  ${displayTitle(thread.title)}`;
+  const header = `${colorize("cyan", shortId(thread.id))}  ${displayTitle(thread.title)}`;
 
   if (pretty === "oneline") {
     return header;
@@ -197,9 +200,9 @@ function formatThread(thread: ThreadSummary, pretty: PrettyFormat): string {
 
   const mediumLines = [
     header,
-    `  id: ${thread.id}`,
-    `  updated: ${formatDate(thread.updatedAtMs)}`,
-    `  cwd: ${thread.cwd}`,
+    `  ${colorize("dim", "id:")} ${colorize("cyan", thread.id)}`,
+    `  ${colorize("dim", "updated:")} ${formatDate(thread.updatedAtMs)}`,
+    `  ${colorize("dim", "cwd:")} ${colorize("dim", thread.cwd)}`,
   ];
 
   if (pretty === "medium") {
@@ -208,9 +211,9 @@ function formatThread(thread: ThreadSummary, pretty: PrettyFormat): string {
 
   return [
     ...mediumLines,
-    `  created: ${formatDate(thread.createdAtMs)}`,
-    `  archived: ${thread.archived}`,
-    `  rollout: ${thread.rolloutPath}`,
+    `  ${colorize("dim", "created:")} ${formatDate(thread.createdAtMs)}`,
+    `  ${colorize("dim", "archived:")} ${thread.archived}`,
+    `  ${colorize("dim", "rollout:")} ${colorize("dim", thread.rolloutPath)}`,
   ].join("\n");
 }
 
@@ -242,22 +245,22 @@ function formatPurgeResult(result: PurgeExecutionReport): unknown {
   }
 
   const lines = [
-    "Purge executed.",
+    colorize("green", "Purge executed."),
     "",
     `Target: ${displayTitle(result.plan.target.title)}`,
-    `Thread id: ${result.plan.target.id}`,
-    `Backup: ${result.backup.backupDir}`,
+    `Thread id: ${colorize("cyan", result.plan.target.id)}`,
+    `Backup: ${colorize("dim", result.backup.backupDir)}`,
     "",
     "SQLite changes:",
     ...result.sqlite.map((change) => `- ${change.store}: ${change.changedRows} row(s)`),
     "",
     "JSON changes:",
-    ...result.json.map((change) => `- ${change.changed ? "changed" : "unchanged"}: ${change.path}`),
+    ...result.json.map((change) => `- ${change.changed ? "changed" : "unchanged"}: ${colorize("dim", change.path)}`),
     "",
     "File changes:",
-    ...result.files.map((change) => `- ${change.deleted ? "deleted" : "missing"}: ${change.path}`),
+    ...result.files.map((change) => `- ${change.deleted ? "deleted" : "missing"}: ${colorize("dim", change.path)}`),
     "",
-    `Verification: ${result.verification.success ? "passed" : "failed"}`,
+    `Verification: ${result.verification.success ? colorize("green", "passed") : colorize("red", "failed")}`,
   ];
 
   if (result.verification.remainingReferences.length > 0) {
@@ -276,16 +279,68 @@ function formatPurgeResult(result: PurgeExecutionReport): unknown {
 
 function formatPurgeConfirmation(plan: PurgePlan): string {
   return [
-    "About to purge this local Codex conversation:",
+    colorize("yellow", "About to purge this local Codex conversation:"),
     "",
-    `${shortId(plan.target.id)}  ${displayTitle(plan.target.title)}`,
-    `id: ${plan.target.id}`,
+    `${colorize("cyan", shortId(plan.target.id))}  ${displayTitle(plan.target.title)}`,
+    `id: ${colorize("cyan", plan.target.id)}`,
     `updated: ${formatDate(plan.target.updatedAtMs)}`,
-    `cwd: ${plan.target.cwd}`,
+    `cwd: ${colorize("dim", plan.target.cwd)}`,
     "",
-    "A backup will be created before deletion.",
+    colorize("dim", "A backup will be created before deletion."),
     "",
   ].join("\n");
+}
+
+function formatCheckStatus(status: string): string {
+  const label = status.toUpperCase().padEnd(7);
+  if (status === "ok") {
+    return colorize("green", label);
+  }
+  if (status === "warning") {
+    return colorize("yellow", label);
+  }
+  if (status === "error") {
+    return colorize("red", label);
+  }
+
+  return label;
+}
+
+function colorize(color: ColorName, value: string): string {
+  return applyColor(color, value, colorsEnabled());
+}
+
+function colorizeError(color: ColorName, value: string): string {
+  return applyColor(color, value, errorColorsEnabled());
+}
+
+function applyColor(color: ColorName, value: string, enabled: boolean): string {
+  if (!enabled) {
+    return value;
+  }
+
+  const codes: Record<ColorName, [number, number]> = {
+    cyan: [36, 39],
+    dim: [2, 22],
+    green: [32, 39],
+    red: [31, 39],
+    yellow: [33, 39],
+  };
+  const [open, close] = codes[color];
+
+  return `\u001B[${open}m${value}\u001B[${close}m`;
+}
+
+function colorsEnabled(): boolean {
+  return streamColorsEnabled(process.stdout);
+}
+
+function errorColorsEnabled(): boolean {
+  return streamColorsEnabled(process.stderr);
+}
+
+function streamColorsEnabled(stream: NodeJS.WriteStream): boolean {
+  return !currentOutputModeIsJson() && !("NO_COLOR" in process.env) && Boolean(stream.isTTY);
 }
 
 function displayTitle(title: string): string {

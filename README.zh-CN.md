@@ -133,6 +133,7 @@ codex-history --json purge 019e6885 --force
 
 - `--codex-home` 默认是 `~/.codex`。
 - `--json` 输出机器可读的 JSON。`purge` 使用 JSON 输出时必须加 `--force`，因为交互确认只适合文本模式。
+- 颜色只会在交互式终端中启用，并遵守 `NO_COLOR`。
 
 ## 安全机制
 

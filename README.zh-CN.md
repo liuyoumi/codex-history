@@ -51,7 +51,7 @@ Type 019e6885 to confirm:
 codex-history doctor
 ```
 
-建议安装后先跑一次；Codex 更新后也可以再跑一次。
+建议安装后先跑一次；Codex 更新后也可以再跑一次。如果当前数据结构不受支持，删除命令会拒绝执行，而不是猜测应该怎么删。
 
 ### `list`
 
@@ -73,6 +73,16 @@ codex-history list --pretty=full
 ```
 
 `--grep` 会按显示标题、线程 id、cwd 过滤。它不会搜索或输出对话正文。
+
+执行 `purge` 时，可以使用 `list` 里显示的短 id，也可以粘贴完整 thread id。
+
+默认情况下，`list` 只显示未归档对话。使用 `--archived` 只看已归档对话，使用 `--all` 同时查看已归档和未归档对话。
+
+如果 grep 关键词里有空格，请加引号：
+
+```bash
+codex-history list --grep "Astro 博客"
+```
 
 `--pretty` 支持：
 
@@ -117,7 +127,7 @@ codex-history --json purge 019e6885 --force
 - 将目标解析到唯一一条对话
 - 在可检测时拒绝删除当前 active thread
 - 在 `~/.codex-history/backups` 下创建强制备份
-- 更新受支持的 SQLite、JSON、JSONL、rollout、shell snapshot 数据
+- 从受支持的本地 Codex 数据中移除已知引用
 - 删除后扫描受支持的数据存储，确认目标引用已经移除
 
 这个工具只处理本地 Codex 数据。它不会删除 OpenAI/Codex 服务端记录、系统备份、终端滚动历史、崩溃报告，或你手动保存过的对话副本。

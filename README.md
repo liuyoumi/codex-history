@@ -51,7 +51,7 @@ Check whether the local Codex data layout is supported by this version.
 codex-history doctor
 ```
 
-Run this first after installing, or after a Codex update.
+Run this first after installing, or after a Codex update. If the local data layout is not supported, destructive commands fail closed instead of guessing how to delete.
 
 ### `list`
 
@@ -73,6 +73,16 @@ Default output is one line per conversation:
 ```
 
 `--grep` filters by displayed title, thread id, and cwd. It does not search or print prompt bodies.
+
+Use the short id shown by `list`, or paste a full thread id, when running `purge`.
+
+By default, `list` shows non-archived conversations. Use `--archived` for archived conversations only, or `--all` for both archived and non-archived conversations.
+
+Wrap grep text in quotes when it contains spaces:
+
+```bash
+codex-history list --grep "Astro blog"
+```
 
 `--pretty` formats:
 
@@ -117,7 +127,7 @@ Before deleting, `codex-history`:
 - resolves the target to exactly one conversation
 - refuses the currently active thread when detectable
 - creates a mandatory backup under `~/.codex-history/backups`
-- updates supported SQLite, JSON, JSONL, rollout, and shell snapshot stores
+- removes known references from supported local Codex stores
 - verifies supported stores after mutation
 
 This tool only changes local Codex data. It does not delete server-side OpenAI/Codex records, OS backups, terminal scrollback, crash reports, or user-created transcript copies.

@@ -1,6 +1,6 @@
 {
   "name": "@liuyoumi/codex-history",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CLI for listing and safely purging local Codex conversation history",
   "type": "module",
   "bin": {

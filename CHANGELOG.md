@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 - 2026-05-28
+
+### Documentation
+
+- Document that Codex Desktop should be restarted after purging a conversation.
+- Warn that continuing to chat in an already-open purged conversation can write new local data for the same thread.
+
 ## 0.1.0 - 2026-05-27
 
 Initial release candidate.

@@ -145,6 +145,8 @@ Before deleting, `codex-history`:
 
 This tool only changes local Codex data. It does not delete server-side OpenAI/Codex records, OS backups, terminal scrollback, crash reports, or user-created transcript copies.
 
+If Codex Desktop is already showing the conversation you purge, quit or restart Codex before using it again. A running Codex process may still hold the old conversation in memory, and continuing to chat in that old window can write new local data for the same thread.
+
 ## Q&A
 
 ### Does this delete server-side Codex data?
@@ -158,6 +160,10 @@ Backups are written under `~/.codex-history/backups`.
 ### Can I recover a purged conversation?
 
 The tool creates a backup before deletion, but v0.1 does not include an automatic restore command. Treat `purge` as destructive.
+
+### Do I need to restart Codex after purging?
+
+Recommended, especially for Codex Desktop. `purge` updates local files on disk, but a running Codex process may not refresh its in-memory conversation list immediately. Restart Codex before continuing work.
 
 ## Development
 

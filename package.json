@@ -1,7 +1,7 @@
 {
   "name": "@asjk/codex-history",
   "version": "0.1.0",
-  "description": "A command-line tool that helps you list, inspect, and safely purge local Codex conversation history with backups and confirmation.",
+  "description": "CLI for listing and safely purging local Codex conversation history",
   "type": "module",
   "bin": {
     "codex-history": "./dist/cli.js"

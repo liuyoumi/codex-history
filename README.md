@@ -37,10 +37,10 @@ codex-history purge 019e6885
 ```text
 About to purge this local Codex conversation:
 
-019e6885  Implement Astro blog visual audit
+title: Implement Astro blog visual audit
 id: 019e6885-b5ae-7ae0-a50d-ce5f75b0ac08
-updated: 2026-05-28T03:16:01.959Z
 cwd: /Users/me/Projects/example
+updated: 2026-05-28T03:16:01.959Z
 
 A backup will be created before deletion.
 Type 019e6885 to confirm:

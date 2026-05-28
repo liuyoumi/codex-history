@@ -43,7 +43,6 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@inquirer/prompts": "^7.2.1",
     "better-sqlite3": "^11.7.0",
     "commander": "^12.1.0"
   },

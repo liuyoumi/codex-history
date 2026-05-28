@@ -19,10 +19,8 @@ The `feat/history-cli-mvp` milestone is complete when:
 
 - `codex-history doctor` validates a fixture Codex home
 - `codex-history list` reads threads from a fixture `state_5.sqlite`
-- `codex-history search` matches title, id, first user message, preview, and cwd
-- `codex-history purge --id <id>` prints a dry-run plan without modifying data
-- `codex-history purge --title <title>` refuses duplicate exact-title matches
-- `codex-history purge --contains <keyword> --yes` refuses destructive execution
+- `codex-history search` matches displayed title, id, and cwd
+- `codex-history purge <id>` prints a dry-run plan without modifying data
 - `--codex-home <path>` works for all commands
 - `--json` returns machine-readable output for supported commands
 - tests do not read or write the developer's real `~/.codex`

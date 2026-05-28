@@ -23,8 +23,8 @@ codex-history doctor
 codex-history list
 codex-history list --pretty=medium
 codex-history search "keyword"
-codex-history purge --id <short_or_full_thread_id> --dry-run
-codex-history purge --id <short_or_full_thread_id> --yes
+codex-history purge <short_or_full_thread_id>
+codex-history purge <short_or_full_thread_id> --yes
 ```
 
 `purge --yes` is destructive. It creates a backup first, refuses active-thread matches, mutates supported local Codex stores, and verifies remaining supported references.
@@ -36,8 +36,8 @@ codex-history purge --id <short_or_full_thread_id> --yes
 ```bash
 codex-history doctor
 codex-history search "conversation title"
-codex-history purge --id <thread_id>
-codex-history purge --id <thread_id> --yes
+codex-history purge <thread_id>
+codex-history purge <thread_id> --yes
 ```
 
 `purge` without `--yes` is a dry run.
@@ -62,14 +62,14 @@ Use `--codex-home` for testing against a disposable copy:
 
 ```bash
 codex-history --codex-home /tmp/codex-home doctor
-codex-history --codex-home /tmp/codex-home purge --id <thread_id> --yes
+codex-history --codex-home /tmp/codex-home purge <thread_id> --yes
 ```
 
 ## JSON Output
 
 ```bash
 codex-history --json list
-codex-history --json purge --id <thread_id>
+codex-history --json purge <thread_id>
 ```
 
 ## Safety and Limits

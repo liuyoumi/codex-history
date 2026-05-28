@@ -25,16 +25,9 @@ The implementation should keep path handling portable enough for future Windows 
 ```bash
 codex-history list
 codex-history search "keyword"
-codex-history purge --id <thread_id> --dry-run
-codex-history purge --id <thread_id> --yes
+codex-history purge <thread_id>
+codex-history purge <thread_id> --yes
 codex-history doctor
-```
-
-Planned resolution helpers:
-
-```bash
-codex-history purge --title "exact title"
-codex-history purge --contains "keyword"
 ```
 
 Deletion must internally resolve to exactly one Codex thread id before modifying local data.
@@ -64,11 +57,9 @@ Deletion must internally resolve to exactly one Codex thread id before modifying
 Version `0.1` should support:
 
 - list local threads from `~/.codex/state_5.sqlite`
-- search by title and first-message preview
+- search by displayed title, id, and cwd
 - dry-run purge planning
 - purge by unique thread id
-- exact-title purge only when it resolves to one thread
-- keyword search that prints candidates but does not delete directly
 - remove related local records from supported Codex stores
 - `doctor` command for data model checks
 - fixture-based tests for purge planning and purge execution
@@ -79,9 +70,6 @@ Version `0.1` should support:
 The tool must make destructive behavior intentionally boring and hard to trigger by accident.
 
 - `purge` without `--yes` is always a dry run.
-- `purge --contains` is search-only in `0.1` and must refuse execution.
-- `purge --title` requires exact title match.
-- exact title matches that return more than one thread must refuse execution.
 - every purge plan must show the resolved thread id before deletion.
 - every purge plan must show all known stores that will be touched.
 - successful purge must print a verification summary.

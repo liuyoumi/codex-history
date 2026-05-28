@@ -15,8 +15,8 @@ Decisions:
 - Include `doctor` in `0.1`.
 - Keep `archive` out of `0.1`.
 - Make backup mandatory in `0.1`.
-- Permit exact-title purge only when it resolves to one thread.
-- Refuse fuzzy destructive purge.
+- Keep destructive purge id-only.
+- Use `list` and `search` to resolve human-readable text to an id before purge.
 - Support npm global install and `npx` usage.
 - Target macOS for verified `0.1` behavior.
 
@@ -46,14 +46,12 @@ Status: accepted for v0.1
 Questions:
 
 - What should count as an active thread?
-- Should purge by title require exact title only?
-- Should fuzzy matching be search-only and never delete directly?
+- Should purge accept title or fuzzy selectors?
 
 Decisions:
 
 - Treat active-thread detection conservatively.
-- Use exact-title matching only for destructive title resolution.
-- Keep fuzzy matching search-only in `0.1`.
+- Keep destructive purge id-only in `0.1`; use `list` or `search` to find the id first.
 - Refuse purge if backup cannot be created.
 - Refuse purge if schema validation fails.
 - Refuse purge if verification cannot run.

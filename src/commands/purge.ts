@@ -1,21 +1,11 @@
 import type { ResolvedPaths } from "../core/paths.js";
-import { SafetyRefusalError } from "../core/errors.js";
 import { executePurge } from "../core/executor.js";
-import { buildDryRunPurgePlan, resolvePurgeTarget, type PurgeTargetInput } from "../core/planner.js";
+import { buildDryRunPurgePlan, resolvePurgeTarget } from "../core/planner.js";
 import { validateSupportedDataModel } from "../core/schema.js";
 
-export function purgeCommand(paths: ResolvedPaths, input: PurgeTargetInput, execute: boolean) {
+export function purgeCommand(paths: ResolvedPaths, threadId: string, execute: boolean) {
   validateSupportedDataModel(paths, { requireBackupHome: execute });
-  const target = resolvePurgeTarget(paths, input);
-
-  if ("kind" in target) {
-    if (execute) {
-      throw new SafetyRefusalError("--contains is search-only in v0.1 and cannot execute purge.");
-    }
-
-    return target;
-  }
-
+  const target = resolvePurgeTarget(paths, threadId);
   const plan = buildDryRunPurgePlan(paths, target);
 
   if (execute) {

@@ -22,9 +22,9 @@ node dist/cli.js list --limit 3
 node dist/cli.js list --limit 3 --pretty=medium
 node dist/cli.js list --limit 1 --pretty=full
 node dist/cli.js search Astro --no-pager --limit 1
-node dist/cli.js purge --id 019e6885
+node dist/cli.js purge 019e6885
 CODEX_HISTORY_HOME=/private/tmp/codex-history-home node dist/cli.js doctor
-CODEX_HISTORY_HOME=/private/tmp/codex-history-home node dist/cli.js purge --id definitely-not-a-real-thread --yes
+CODEX_HISTORY_HOME=/private/tmp/codex-history-home node dist/cli.js purge definitely-not-a-real-thread --yes
 ```
 
 Expected:
@@ -35,12 +35,12 @@ Expected:
 - `list --limit 3` prints recent local conversations.
 - `search Astro --no-pager --limit 1` prints one matching conversation.
 - `CODEX_HISTORY_HOME=/private/tmp/codex-history-home node dist/cli.js doctor` passes when the tool home is writable.
-- `purge --id definitely-not-a-real-thread --yes` fails safely without mutating data.
+- `purge definitely-not-a-real-thread --yes` fails safely without mutating data.
 
 Result:
 
 - `npm run typecheck`: passed.
-- `npm test`: passed, 12 tests.
+- `npm test`: passed, 9 tests.
 - `npm run build`: passed.
 - `NPM_CONFIG_CACHE=/private/tmp/codex-history-npm-cache npm pack --dry-run`: passed.
 - `node dist/cli.js doctor`: failed safely because the current sandbox cannot create `/Users/lg/.codex-history`.
@@ -49,6 +49,6 @@ Result:
 - `node dist/cli.js list --limit 3 --pretty=medium`: passed.
 - `node dist/cli.js list --limit 1 --pretty=full`: passed.
 - `node dist/cli.js search Astro --no-pager --limit 1`: passed.
-- `node dist/cli.js purge --id 019e6885`: passed as dry-run and resolved the short id.
+- `node dist/cli.js purge 019e6885`: passed as dry-run and resolved the short id.
 - `CODEX_HISTORY_HOME=/private/tmp/codex-history-home node dist/cli.js doctor`: passed.
-- `CODEX_HISTORY_HOME=/private/tmp/codex-history-home node dist/cli.js purge --id definitely-not-a-real-thread --yes`: failed safely with "No Codex thread found".
+- `CODEX_HISTORY_HOME=/private/tmp/codex-history-home node dist/cli.js purge definitely-not-a-real-thread --yes`: failed safely with "No Codex thread found".

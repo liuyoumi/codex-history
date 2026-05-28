@@ -8,8 +8,8 @@ Initial release candidate.
 
 - `doctor` command for local Codex data model checks.
 - `list` command for local conversation discovery.
-- `search` command for title, id, prompt, preview, and cwd matching.
-- `purge` dry-run planning by id or exact title.
+- `search` command for displayed title, id, and cwd matching.
+- `purge <id>` dry-run planning by full id or unique short id prefix.
 - Guarded `purge --yes` execution with mandatory backups.
 - SQLite cleanup for supported Codex stores.
 - JSON and JSONL state cleanup for supported Codex files.
@@ -23,4 +23,3 @@ Initial release candidate.
 - v0.1.0 is macOS-first.
 - Server-side deletion is not supported or claimed.
 - Physical secure erase from SSDs, APFS snapshots, or Time Machine backups is not supported.
-

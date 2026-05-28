@@ -5,7 +5,7 @@
 - Human-readable output is the default.
 - Destructive commands default to dry-run behavior.
 - Machine-readable JSON output should be available with `--json`.
-- Search may be fuzzy; purge resolution must be exact.
+- Search may be broad; purge resolution must be a unique full id or short id prefix.
 - Any command that cannot validate the Codex data model must fail closed.
 
 ## Global Options
@@ -108,10 +108,8 @@ Prompt bodies are not searched by default because this tool is meant to match Co
 ## `purge`
 
 ```bash
-codex-history purge --id <thread_id>
-codex-history purge --id <thread_id> --yes
-codex-history purge --title "exact title"
-codex-history purge --title "exact title" --yes
+codex-history purge <thread_id>
+codex-history purge <thread_id> --yes
 ```
 
 Default behavior:
@@ -126,14 +124,6 @@ Execution behavior:
 - requires backup creation
 - refuses active threads
 - runs verification after mutation
-
-Unsupported in `0.1`:
-
-```bash
-codex-history purge --contains "keyword" --yes
-```
-
-`--contains` may print matching candidates, but must not execute purge in `0.1`.
 
 ## Exit Codes
 

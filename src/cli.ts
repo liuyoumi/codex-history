@@ -9,7 +9,7 @@ import { CodexHistoryError } from "./core/errors.js";
 import type { PurgeExecutionReport } from "./core/executor.js";
 import { formatDate, printOutput, shortId, type OutputMode } from "./core/output.js";
 import { resolvePaths } from "./core/paths.js";
-import type { ContainsResolution, PurgePlan } from "./core/planner.js";
+import type { PurgePlan } from "./core/planner.js";
 import type { DoctorReport } from "./core/schema.js";
 import type { ThreadSummary } from "./core/threads.js";
 
@@ -64,9 +64,9 @@ program
 
 program
   .command("search")
-  .argument("<keyword>", "Title or prompt keyword to search for")
+  .argument("<keyword>", "Title, id, or cwd keyword to search for")
   .description("Search local Codex conversations.")
-  .option("--limit <number>", "Maximum rows to scan/show", parseInteger)
+  .option("--limit <number>", "Maximum matching rows to show", parseInteger)
   .option("--all", "Include archived and non-archived threads")
   .option("--archived", "Show archived threads")
   .option("--pretty <format>", "Output format: oneline, medium, full", parsePretty, "oneline")
@@ -87,22 +87,16 @@ program
 
 program
   .command("purge")
-  .option("--id <threadId>", "Codex thread id to purge")
-  .option("--title <title>", "Exact title to resolve before purge")
-  .option("--contains <keyword>", "Title or first-message keyword to resolve before purge")
+  .argument("<threadId>", "Codex thread id or unique short id prefix to purge")
   .option("--dry-run", "Plan purge without modifying local Codex data", true)
   .option("--yes", "Execute purge after confirmation checks")
-  .description("Plan a purge. Execution remains blocked until purge safety implementation.")
-  .action((options) =>
+  .description("Plan or execute a safe purge for one local Codex conversation.")
+  .action((threadId: string, options) =>
     runCommand(() =>
       formatPurgeResult(
         purgeCommand(
           currentPaths(),
-          {
-            id: options.id,
-            title: options.title,
-            contains: options.contains,
-          },
+          threadId,
           Boolean(options.yes),
         ),
       ),
@@ -236,17 +230,9 @@ function pageText(text: string): string {
   return "";
 }
 
-function formatPurgeResult(result: PurgePlan | ContainsResolution | PurgeExecutionReport): unknown {
+function formatPurgeResult(result: PurgePlan | PurgeExecutionReport): unknown {
   if (currentOutputMode() === "json") {
     return sanitizePurgeResult(result);
-  }
-
-  if ("kind" in result) {
-    return [
-      "--contains is search-only in v0.1. Matching candidates:",
-      "",
-      formatThreads(result.matches),
-    ].join("\n");
   }
 
   if (result.mode === "executed") {
@@ -332,14 +318,7 @@ function toPublicThread(thread: ThreadSummary) {
   };
 }
 
-function sanitizePurgeResult(result: PurgePlan | ContainsResolution | PurgeExecutionReport): unknown {
-  if ("kind" in result) {
-    return {
-      kind: result.kind,
-      matches: result.matches.map(toPublicThread),
-    };
-  }
-
+function sanitizePurgeResult(result: PurgePlan | PurgeExecutionReport): unknown {
   if (result.mode === "executed") {
     return {
       ...result,

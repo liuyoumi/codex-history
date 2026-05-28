@@ -130,24 +130,6 @@ export function getThreadsByIdPrefix(paths: ResolvedPaths, idPrefix: string): Th
   }
 }
 
-export function getThreadsByExactTitle(paths: ResolvedPaths, title: string): ThreadSummary[] {
-  const sessionIndex = readSessionIndex(paths.sessionIndex);
-  const db = openReadonlyDatabase(paths.stateDb);
-  try {
-    const rows = db
-      .prepare(
-        `select id, title, rollout_path, created_at, updated_at, created_at_ms, updated_at_ms, cwd, archived, first_user_message, preview
-         from threads
-         order by coalesce(updated_at_ms, updated_at * 1000) desc, id desc`,
-      )
-      .all() as ThreadRow[];
-
-    return rows.map((row) => mapThreadRow(row, sessionIndex)).filter((thread) => thread.title === title);
-  } finally {
-    db.close();
-  }
-}
-
 function mapThreadRow(row: ThreadRow, sessionIndex: Map<string, { threadName: string }>): ThreadSummary {
   const sourceTitle = row.title;
   const displayTitle = sessionIndex.get(row.id)?.threadName || sourceTitle;

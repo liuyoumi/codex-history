@@ -62,7 +62,7 @@ describe("mvp commands", () => {
 
   it("builds a dry-run purge plan by id", () => {
     const fixture = createCodexFixture();
-    const plan = purgeCommand(fixture.paths, { id: "thread-1" }, false);
+    const plan = purgeCommand(fixture.paths, "thread-1", false);
 
     expect("mode" in plan && plan.mode).toBe("dry-run");
     if ("mode" in plan && plan.mode === "dry-run") {
@@ -74,7 +74,7 @@ describe("mvp commands", () => {
 
   it("resolves a unique short id prefix for purge", () => {
     const fixture = createCodexFixture();
-    const plan = purgeCommand(fixture.paths, { id: "thread-1".slice(0, 8) }, false);
+    const plan = purgeCommand(fixture.paths, "thread-1".slice(0, 8), false);
 
     expect("mode" in plan && plan.mode).toBe("dry-run");
     if ("mode" in plan && plan.mode === "dry-run") {
@@ -82,31 +82,9 @@ describe("mvp commands", () => {
     }
   });
 
-  it("refuses duplicate exact-title purge resolution", () => {
-    const fixture = createCodexFixture();
-
-    expect(() => purgeCommand(fixture.paths, { title: "Delete Me" }, false)).toThrow(SafetyRefusalError);
-  });
-
-  it("keeps contains matching search-only", () => {
-    const fixture = createCodexFixture();
-    const result = purgeCommand(fixture.paths, { contains: "delete" }, false);
-
-    expect("kind" in result && result.kind).toBe("contains_matches");
-    if ("kind" in result) {
-      expect(result.matches.length).toBeGreaterThan(0);
-    }
-  });
-
-  it("refuses contains execution", () => {
-    const fixture = createCodexFixture();
-
-    expect(() => purgeCommand(fixture.paths, { contains: "delete" }, true)).toThrow(SafetyRefusalError);
-  });
-
   it("executes purge with backup and verification in a fixture", () => {
     const fixture = createCodexFixture();
-    const result = purgeCommand(fixture.paths, { id: "thread-1" }, true);
+    const result = purgeCommand(fixture.paths, "thread-1", true);
 
     expect("mode" in result && result.mode).toBe("executed");
     if (!("mode" in result) || result.mode !== "executed") {
@@ -145,6 +123,6 @@ describe("mvp commands", () => {
     const fixture = createCodexFixture();
     process.env.CODEX_THREAD_ID = "thread-1";
 
-    expect(() => purgeCommand(fixture.paths, { id: "thread-1" }, true)).toThrow(SafetyRefusalError);
+    expect(() => purgeCommand(fixture.paths, "thread-1", true)).toThrow(SafetyRefusalError);
   });
 });

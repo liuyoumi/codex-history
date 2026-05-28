@@ -58,19 +58,16 @@ Decisions:
 
 ## Final v0.1 Spec Status
 
-Status: ready for non-destructive implementation
+Status: implemented for v0.1 release candidate
 
 Allowed next work:
 
 - implement `doctor`
 - implement `list`
 - implement `search`
-- implement dry-run purge planning
+- implement purge planning and guarded execution
 - add fixture tests
 
 Still blocked:
 
-- `purge --yes`
-- SQLite mutation against real Codex stores
-- JSON/JSONL mutation against real Codex stores
-- rollout file deletion
+- none for v0.1 release candidate

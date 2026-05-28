@@ -3,7 +3,7 @@
 ## Principles
 
 - Human-readable output is the default.
-- Destructive commands default to dry-run behavior.
+- Destructive commands require target confirmation by default.
 - Machine-readable JSON output should be available with `--json`.
 - Search may be broad; purge resolution must be a unique full id or short id prefix.
 - Any command that cannot validate the Codex data model must fail closed.
@@ -109,21 +109,26 @@ Prompt bodies are not searched by default because this tool is meant to match Co
 
 ```bash
 codex-history purge <thread_id>
-codex-history purge <thread_id> --yes
+codex-history purge <thread_id> --force
 ```
 
 Default behavior:
 
-- build and print a dry-run plan
-- do not modify local Codex data
+- resolve the target to a unique full id or short id prefix
+- print the target short id, title, full id, updated time, and cwd
+- require the user to type the standard short id before deletion
+- refuse non-interactive execution unless `--force` is provided
 
 Execution behavior:
 
-- requires `--yes`
 - requires a unique thread id or unique short id prefix
 - requires backup creation
 - refuses active threads
 - runs verification after mutation
+
+`--force` skips only interactive confirmation. It does not skip schema validation, backup creation, active-thread checks, or verification.
+
+`--json purge <thread_id>` requires `--force`, because interactive confirmation is text-only.
 
 ## Exit Codes
 

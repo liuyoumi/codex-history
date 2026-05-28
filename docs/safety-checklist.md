@@ -3,9 +3,8 @@
 ## Before Purge
 
 - [ ] Resolve user input to exactly one thread id.
-- [ ] Show title, cwd, updated time, and rollout path.
-- [ ] Default to dry-run.
-- [ ] Require `--yes` for destructive execution.
+- [ ] Show short id, title, full id, updated time, and cwd.
+- [ ] Require interactive short-id confirmation unless `--force` is used.
 - [ ] Refuse to purge active thread.
 - [ ] Refuse fuzzy destructive deletion.
 - [ ] Validate SQLite schema.

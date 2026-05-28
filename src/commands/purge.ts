@@ -1,16 +1,20 @@
 import type { ResolvedPaths } from "../core/paths.js";
 import { executePurge } from "../core/executor.js";
-import { buildDryRunPurgePlan, resolvePurgeTarget } from "../core/planner.js";
+import { buildPurgePlan, resolvePurgeTarget, type PurgePlan } from "../core/planner.js";
 import { validateSupportedDataModel } from "../core/schema.js";
 
-export function purgeCommand(paths: ResolvedPaths, threadId: string, execute: boolean) {
-  validateSupportedDataModel(paths, { requireBackupHome: execute });
+export function planPurgeCommand(paths: ResolvedPaths, threadId: string): PurgePlan {
+  validateSupportedDataModel(paths);
   const target = resolvePurgeTarget(paths, threadId);
-  const plan = buildDryRunPurgePlan(paths, target);
+  return buildPurgePlan(paths, target);
+}
 
-  if (execute) {
-    return executePurge(paths, plan);
-  }
+export function executePurgePlanCommand(paths: ResolvedPaths, plan: PurgePlan) {
+  validateSupportedDataModel(paths, { requireBackupHome: true });
+  return executePurge(paths, plan);
+}
 
-  return plan;
+export function purgeCommand(paths: ResolvedPaths, threadId: string) {
+  const plan = planPurgeCommand(paths, threadId);
+  return executePurgePlanCommand(paths, plan);
 }

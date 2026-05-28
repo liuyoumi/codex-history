@@ -4,7 +4,7 @@
 
 - `chore/project-foundation`: initial project scaffold
 - `docs/finalize-spec`: reviewed product and technical specification
-- `feat/history-cli-mvp`: non-destructive list, search, doctor, dry-run planning
+- `feat/history-cli-mvp`: list, search, doctor, and purge planning
 - `feat/purge-safety`: destructive purge with backups and verification
 - `release/v0.1.0`: npm packaging and release notes
 
@@ -52,13 +52,13 @@ Required features:
 - JSON and JSONL structural mutations
 - rollout and shell snapshot deletion
 - verification
-- mandatory `--yes` execution guard
+- interactive short-id confirmation with `--force` for non-interactive execution
 
 Exit criteria:
 
 - [x] destructive tests use fixtures only
 - [x] active-thread protection exists
-- [x] `purge --yes` requires exact unique target
+- [x] `purge` requires exact unique target
 - [x] verification failures exit non-zero
 - [ ] macOS manual verification against a disposable Codex home
 

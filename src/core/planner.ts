@@ -16,7 +16,7 @@ export type StorePlan = {
 };
 
 export type PurgePlan = {
-  mode: "dry-run";
+  mode: "planned";
   target: ThreadSummary;
   stores: StorePlan[];
   warnings: string[];
@@ -38,7 +38,7 @@ export function resolvePurgeTarget(paths: ResolvedPaths, threadId: string): Thre
   return matches[0];
 }
 
-export function buildDryRunPurgePlan(paths: ResolvedPaths, target: ThreadSummary): PurgePlan {
+export function buildPurgePlan(paths: ResolvedPaths, target: ThreadSummary): PurgePlan {
   const stores: StorePlan[] = [];
   const warnings: string[] = [];
 
@@ -59,7 +59,7 @@ export function buildDryRunPurgePlan(paths: ResolvedPaths, target: ThreadSummary
   }
 
   return {
-    mode: "dry-run",
+    mode: "planned",
     target,
     stores,
     warnings,

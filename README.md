@@ -2,7 +2,7 @@
 
 Terminal tool for inspecting and safely purging local Codex conversation history.
 
-> Status: v0.1 release candidate. The CLI supports local discovery, dry-run planning, and guarded purge execution with mandatory backups.
+> Status: v0.1 release candidate. The CLI supports local discovery and guarded purge execution with mandatory backups.
 
 ## Package
 
@@ -24,10 +24,10 @@ codex-history list
 codex-history list --pretty=medium
 codex-history search "keyword"
 codex-history purge <short_or_full_thread_id>
-codex-history purge <short_or_full_thread_id> --yes
+codex-history purge <short_or_full_thread_id> --force
 ```
 
-`purge --yes` is destructive. It creates a backup first, refuses active-thread matches, mutates supported local Codex stores, and verifies remaining supported references.
+`purge` is destructive after confirmation. It creates a backup first, refuses active-thread matches, mutates supported local Codex stores, and verifies remaining supported references.
 
 `list` and `search` default to one-line output, similar to `git log --oneline`. They show the same compact conversation names Codex uses in its history list when available. Long fallback titles are truncated with `...`; prompt bodies are not printed.
 
@@ -37,12 +37,25 @@ codex-history purge <short_or_full_thread_id> --yes
 codex-history doctor
 codex-history search "conversation title"
 codex-history purge <thread_id>
-codex-history purge <thread_id> --yes
 ```
 
-`purge` without `--yes` is a dry run.
+`purge` shows the resolved target and asks you to type the standard short id before deleting. Use `--force` only when you intentionally want to skip interactive confirmation.
 
 Short ids from `list` can be used with `purge` as long as the prefix uniquely identifies one thread.
+
+Interactive confirmation looks like this:
+
+```text
+About to purge this local Codex conversation:
+
+019e6885  Example conversation title
+id: 019e6885-b5ae-7ae0-a50d-ce5f75b0ac08
+updated: 2026-05-28T03:16:01.959Z
+cwd: /Users/me/Projects/example
+
+A backup will be created before deletion.
+Type 019e6885 to confirm:
+```
 
 ## Output Formats
 
@@ -62,14 +75,14 @@ Use `--codex-home` for testing against a disposable copy:
 
 ```bash
 codex-history --codex-home /tmp/codex-home doctor
-codex-history --codex-home /tmp/codex-home purge <thread_id> --yes
+codex-history --codex-home /tmp/codex-home purge <thread_id> --force
 ```
 
 ## JSON Output
 
 ```bash
 codex-history --json list
-codex-history --json purge <thread_id>
+codex-history --json purge <thread_id> --force
 ```
 
 ## Safety and Limits
@@ -96,7 +109,7 @@ Before executing purge, the tool:
 
 - Documentation must be finalized and reviewed before purge execution is implemented.
 - `purge` must resolve candidates to a unique Codex thread id before modifying files.
-- `dry-run` is the default behavior for destructive operations.
+- Interactive purge requires typing the standard short id before deletion unless `--force` is used.
 - Active threads must not be purged.
 - macOS is the first supported and verified platform.
 - Backups are mandatory before purge execution.

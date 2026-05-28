@@ -32,7 +32,7 @@ Suggested modules:
 - `paths`: resolve Codex home, tool home, and platform-specific paths
 - `schema`: validate supported Codex data model
 - `threads`: list, search, and resolve thread candidates
-- `planner`: build dry-run purge plans
+- `planner`: build purge plans before mutation
 - `backup`: copy all files required for rollback or manual inspection
 - `sqlite`: execute database mutations with transactions and checkpoints
 - `json-state`: mutate structured JSON and JSONL state files
@@ -73,7 +73,7 @@ Purge execution should use these steps:
 7. Optionally vacuum SQLite databases.
 8. Verify no supported store still references the thread id.
 
-`purge` without `--yes` stops after step 3 and prints the plan.
+Interactive `purge` shows the resolved target after step 3 and requires the user to type the standard short id before continuing. `--force` skips only that interactive confirmation.
 
 ## Purge Plan
 

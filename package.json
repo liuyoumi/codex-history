@@ -4,7 +4,7 @@
   "description": "CLI for listing and safely purging local Codex conversation history",
   "type": "module",
   "bin": {
-    "codex-history": "./dist/cli.js"
+    "codex-history": "dist/cli.js"
   },
   "files": [
     "dist",

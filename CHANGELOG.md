@@ -6,8 +6,8 @@
 
 - Use Chinese as the default README language.
 - Add an English README translation.
-- Add a generated README cover image.
-- Mark macOS, Windows, and Linux as verified in the README.
+- Refresh the README cover image to show the list, filter, purge, backup, and verification flow.
+- Add README badges and clearer macOS, Windows, and Linux support notes.
 
 ## 0.1.1 - 2026-05-28
 

@@ -1,8 +1,20 @@
+<h1 align="center">Codex History</h1>
+
+<p align="center">
+  <img alt="npm" src="https://img.shields.io/npm/v/@liuyoumi/codex-history?style=flat-square&color=cb9b27" />
+  <img alt="platform" src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-2ea043?style=flat-square" />
+  <img alt="local only" src="https://img.shields.io/badge/local%20data-only-6e7681?style=flat-square" />
+  <img alt="backup" src="https://img.shields.io/badge/backup-before%20purge-0969da?style=flat-square" />
+  <img alt="license" src="https://img.shields.io/npm/l/@liuyoumi/codex-history?style=flat-square" />
+</p>
+
+<p align="center">
+  <a href="README.md">中文</a> | <a href="README.en.md">English</a>
+</p>
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/liuyoumi/codex-history/main/assets/cover.png" alt="codex-history cover" width="100%" />
 </p>
-
-[中文](README.md) | [English](README.en.md)
 
 A small CLI for finding and removing local Codex conversation history.
 
@@ -22,9 +34,15 @@ npx @liuyoumi/codex-history doctor
 
 ## Supported Platforms
 
-- macOS: verified
-- Windows: verified
-- Linux: verified
+`codex-history` has been checked on macOS, Windows, and Linux for install, `doctor`, `list` / `--grep`, and guarded `purge` workflows with confirmation and backups.
+
+| Platform | Status |
+| --- | --- |
+| macOS | Ready for everyday local history management |
+| Windows | Ready for everyday local history management |
+| Linux | Ready for everyday local history management |
+
+Codex local data layouts may change between Codex releases. After updating Codex, run `codex-history doctor` before purging conversations.
 
 ## Quick Start
 

@@ -1,8 +1,20 @@
+<h1 align="center">Codex History</h1>
+
+<p align="center">
+  <img alt="npm" src="https://img.shields.io/npm/v/@liuyoumi/codex-history?style=flat-square&color=cb9b27" />
+  <img alt="platform" src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-2ea043?style=flat-square" />
+  <img alt="local only" src="https://img.shields.io/badge/local%20data-only-6e7681?style=flat-square" />
+  <img alt="backup" src="https://img.shields.io/badge/backup-before%20purge-0969da?style=flat-square" />
+  <img alt="license" src="https://img.shields.io/npm/l/@liuyoumi/codex-history?style=flat-square" />
+</p>
+
+<p align="center">
+  <a href="README.md">中文</a> | <a href="README.en.md">English</a>
+</p>
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/liuyoumi/codex-history/main/assets/cover.png" alt="codex-history 封面" width="100%" />
 </p>
-
-[中文](README.md) | [English](README.en.md)
 
 一个用来查找并删除本地 Codex 对话历史的小型命令行工具。
 
@@ -22,9 +34,15 @@ npx @liuyoumi/codex-history doctor
 
 ## 支持平台
 
-- macOS：已验证
-- Windows：已验证
-- Linux：已验证
+`codex-history` 已在 macOS、Windows、Linux 上完成基础流程验证，包括安装、`doctor`、`list` / `--grep`，以及带确认和备份保护的 `purge`。
+
+| 平台 | 状态 |
+| --- | --- |
+| macOS | 可用于日常本地历史管理 |
+| Windows | 可用于日常本地历史管理 |
+| Linux | 可用于日常本地历史管理 |
+
+Codex 本地数据结构可能随版本变化。Codex 升级后，建议先运行 `codex-history doctor` 再执行删除操作。
 
 ## 快速开始
 

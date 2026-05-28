@@ -67,7 +67,7 @@ codex-history list --pretty=full
 
 `oneline` is the default. `medium` adds full id, update time, and cwd. `full` also adds creation time, archive state, and rollout path.
 
-When `list` or `search` runs in an interactive terminal without `--limit`, the command reads all matching conversations and sends output through the system pager. Use `--limit` to cap rows or `--no-pager` to disable paging.
+When `list` or `search` runs in an interactive terminal without `--limit`, the command reads all matching conversations and sends output through the system pager. Use `--limit` to cap rows. Piped or redirected output skips the pager automatically.
 
 ## Targeting a Custom Codex Home
 

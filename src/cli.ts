@@ -47,7 +47,6 @@ program
   .option("--archived", "Show archived threads")
   .option("--cwd <path>", "Filter by exact working directory")
   .option("--pretty <format>", "Output format: oneline, medium, full", parsePretty, "oneline")
-  .option("--no-pager", "Disable pager output")
   .action((options) =>
     runCommand(() =>
       formatThreads(
@@ -71,7 +70,6 @@ program
   .option("--all", "Include archived and non-archived threads")
   .option("--archived", "Show archived threads")
   .option("--pretty <format>", "Output format: oneline, medium, full", parsePretty, "oneline")
-  .option("--no-pager", "Disable pager output")
   .action((keyword: string, options) =>
     runCommand(() =>
       formatThreads(
@@ -152,8 +150,8 @@ function parsePretty(value: string): PrettyFormat {
   throw new Error(`Expected pretty format oneline, medium, or full; got: ${value}`);
 }
 
-function shouldUsePager(options: { limit?: number; pager?: boolean }): boolean {
-  return Boolean(options.pager && options.limit === undefined && process.stdout.isTTY && !currentOutputModeIsJson());
+function shouldUsePager(options: { limit?: number }): boolean {
+  return Boolean(options.limit === undefined && process.stdout.isTTY && !currentOutputModeIsJson());
 }
 
 function currentOutputModeIsJson(): boolean {

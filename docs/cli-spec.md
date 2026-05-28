@@ -54,7 +54,6 @@ codex-history list --cwd /path/to/project
 codex-history list --pretty=oneline
 codex-history list --pretty=medium
 codex-history list --pretty=full
-codex-history list --no-pager
 codex-history list --json
 ```
 
@@ -65,6 +64,7 @@ Default behavior:
 - show one-line rows
 - read all rows unless `--limit` is provided
 - use pager in an interactive terminal when no limit is provided
+- skip pager automatically when output is piped or redirected
 
 `oneline` columns:
 
@@ -89,7 +89,6 @@ Default behavior:
 codex-history search "keyword"
 codex-history search "keyword" --all
 codex-history search "keyword" --pretty=medium
-codex-history search "keyword" --no-pager
 codex-history search "keyword" --json
 ```
 

@@ -6,7 +6,7 @@
 
 - Use Chinese as the default README language.
 - Add an English README translation.
-- Refresh the README cover image to show the list, filter, purge, backup, and verification flow.
+- Refresh the README cover image to focus on a single guarded `purge` command flow.
 - Add README badges and clearer macOS, Windows, and Linux support notes.
 
 ## 0.1.1 - 2026-05-28

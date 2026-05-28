@@ -1,5 +1,8 @@
 # codex-history
 
+[![npm version](https://img.shields.io/npm/v/@asjk/codex-history.svg)](https://www.npmjs.com/package/@asjk/codex-history)
+[![license](https://img.shields.io/npm/l/@asjk/codex-history.svg)](LICENSE)
+
 [English](README.md) | [简体中文](README.zh-CN.md)
 
 一个用来查找并删除本地 Codex 对话历史的小型命令行工具。
@@ -17,6 +20,11 @@ npm install -g @asjk/codex-history
 ```bash
 npx @asjk/codex-history doctor
 ```
+
+## 支持平台
+
+- macOS：v0.1 已验证
+- Windows/Linux：暂未验证
 
 ## 快速开始
 
@@ -42,6 +50,13 @@ Type 019e6885 to confirm:
 ```
 
 ## 命令
+
+| 命令 | 说明 |
+| --- | --- |
+| `codex-history doctor` | 检查当前本地 Codex 数据结构是否受支持。 |
+| `codex-history list` | 列出本地对话。 |
+| `codex-history list --grep <keyword>` | 按标题、id 或 cwd 过滤对话。 |
+| `codex-history purge <id>` | 确认后删除一条解析到的本地对话。 |
 
 ### `doctor`
 
@@ -131,6 +146,20 @@ codex-history --json purge 019e6885 --force
 - 删除后扫描受支持的数据存储，确认目标引用已经移除
 
 这个工具只处理本地 Codex 数据。它不会删除 OpenAI/Codex 服务端记录、系统备份、终端滚动历史、崩溃报告，或你手动保存过的对话副本。
+
+## Q&A
+
+### 会删除 Codex 服务端数据吗？
+
+不会。它只修改你机器上受支持的本地文件。
+
+### 备份在哪里？
+
+备份会写入 `~/.codex-history/backups`。
+
+### 删除后还能恢复吗？
+
+工具会在删除前创建备份，但 v0.1 还没有自动恢复命令。请把 `purge` 当作破坏性操作对待。
 
 ## 开发
 

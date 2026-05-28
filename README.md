@@ -1,5 +1,8 @@
 # codex-history
 
+[![npm version](https://img.shields.io/npm/v/@asjk/codex-history.svg)](https://www.npmjs.com/package/@asjk/codex-history)
+[![license](https://img.shields.io/npm/l/@asjk/codex-history.svg)](LICENSE)
+
 [English](README.md) | [简体中文](README.zh-CN.md)
 
 A small CLI for finding and removing local Codex conversation history.
@@ -17,6 +20,11 @@ Or run it without installing:
 ```bash
 npx @asjk/codex-history doctor
 ```
+
+## Supported Platforms
+
+- macOS: verified for v0.1
+- Windows/Linux: not verified yet
 
 ## Quick Start
 
@@ -42,6 +50,13 @@ Type 019e6885 to confirm:
 ```
 
 ## Commands
+
+| Command | Description |
+| --- | --- |
+| `codex-history doctor` | Check whether the local Codex data layout is supported. |
+| `codex-history list` | List local conversations. |
+| `codex-history list --grep <keyword>` | Filter conversations by title, id, or cwd. |
+| `codex-history purge <id>` | Remove one resolved local conversation after confirmation. |
 
 ### `doctor`
 
@@ -131,6 +146,20 @@ Before deleting, `codex-history`:
 - verifies supported stores after mutation
 
 This tool only changes local Codex data. It does not delete server-side OpenAI/Codex records, OS backups, terminal scrollback, crash reports, or user-created transcript copies.
+
+## Q&A
+
+### Does this delete server-side Codex data?
+
+No. It only modifies supported local files on your machine.
+
+### Where are backups stored?
+
+Backups are written under `~/.codex-history/backups`.
+
+### Can I recover a purged conversation?
+
+The tool creates a backup before deletion, but v0.1 does not include an automatic restore command. Treat `purge` as destructive.
 
 ## Development
 

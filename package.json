@@ -1,7 +1,7 @@
 {
   "name": "@asjk/codex-history",
   "version": "0.1.0",
-  "description": "Terminal tool for inspecting and safely purging local Codex conversation history.",
+  "description": "A command-line tool that helps you list, inspect, and safely purge local Codex conversation history with backups and confirmation.",
   "type": "module",
   "bin": {
     "codex-history": "./dist/cli.js"
@@ -36,6 +36,9 @@
     "url": "https://github.com/liuyoumi/codex-history/issues"
   },
   "homepage": "https://github.com/liuyoumi/codex-history#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=20"
   },

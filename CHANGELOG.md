@@ -6,6 +6,7 @@
 
 - Use Chinese as the only README language.
 - Add a generated README cover image.
+- Mark macOS, Windows, and Linux as verified in the README.
 
 ## 0.1.1 - 2026-05-28
 

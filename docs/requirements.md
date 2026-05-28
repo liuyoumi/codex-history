@@ -13,11 +13,11 @@ The tool should satisfy users who want a conversation to stop appearing in Codex
 - CLI command: `codex-history`
 - Repository: `git@github.com:liuyoumi/codex-history.git`
 
-## Initial Platform
+## Supported Platforms
 
-Version `0.1` targets macOS first.
+Version `0.1` supports macOS, Windows, and Linux.
 
-The implementation should keep path handling portable enough for future Windows and Linux support, but macOS is the only platform that must be verified before the first release.
+The implementation keeps path handling portable and defaults to the local Codex home unless `--codex-home` is provided.
 
 ## Core Commands
 

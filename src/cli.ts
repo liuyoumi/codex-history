@@ -279,7 +279,7 @@ function formatPurgeResult(result: PurgeExecutionReport): unknown {
 
 function formatPurgeConfirmation(plan: PurgePlan): string {
   return [
-    colorize("yellow", "About to purge this local Codex conversation:"),
+    "About to purge this local Codex conversation:",
     "",
     `${colorize("yellow", shortId(plan.target.id))}  ${displayTitle(plan.target.title)}`,
     `id: ${colorize("yellow", plan.target.id)}`,

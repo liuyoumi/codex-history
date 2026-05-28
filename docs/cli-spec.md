@@ -3,9 +3,9 @@
 ## Principles
 
 - Human-readable output is the default.
-- Destructive commands default to dry-run behavior.
+- Destructive commands require target confirmation by default.
 - Machine-readable JSON output should be available with `--json`.
-- Search may be fuzzy; purge resolution must be exact.
+- Search may be broad; purge resolution must be a unique full id or short id prefix.
 - Any command that cannot validate the Codex data model must fail closed.
 
 ## Global Options
@@ -51,10 +51,10 @@ codex-history list --limit 20
 codex-history list --all
 codex-history list --archived
 codex-history list --cwd /path/to/project
+codex-history list --grep "keyword"
 codex-history list --pretty=oneline
 codex-history list --pretty=medium
 codex-history list --pretty=full
-codex-history list --no-pager
 codex-history list --json
 ```
 
@@ -64,7 +64,9 @@ Default behavior:
 - sort by `updated_at` descending
 - show one-line rows
 - read all rows unless `--limit` is provided
+- filter by thread id, title, and cwd when `--grep` is provided
 - use pager in an interactive terminal when no limit is provided
+- skip pager automatically when output is piped or redirected
 
 `oneline` columns:
 
@@ -83,57 +85,42 @@ Default behavior:
 - archive state
 - rollout status
 
-## `search`
-
-```bash
-codex-history search "keyword"
-codex-history search "keyword" --all
-codex-history search "keyword" --pretty=medium
-codex-history search "keyword" --no-pager
-codex-history search "keyword" --json
-```
-
-Search fields:
+`--grep` fields:
 
 - thread id
 - title
 - cwd
 
-Search reads all rows before applying `--limit`, so a cap only limits displayed matches.
+`--grep` reads all rows before applying `--limit`, so a cap only limits displayed matches.
 
-Search is case-insensitive for ASCII text. Locale-sensitive fuzzy matching is not required in `0.1`.
+`--grep` is case-insensitive for ASCII text. Locale-sensitive fuzzy matching is not required in `0.1`.
 
-Prompt bodies are not searched by default because this tool is meant to match Codex history list entries, not dump transcript content.
+Prompt bodies are not searched because this tool is meant to match Codex history list entries, not dump transcript content.
 
 ## `purge`
 
 ```bash
-codex-history purge --id <thread_id>
-codex-history purge --id <thread_id> --yes
-codex-history purge --title "exact title"
-codex-history purge --title "exact title" --yes
+codex-history purge <thread_id>
+codex-history purge <thread_id> --force
 ```
 
 Default behavior:
 
-- build and print a dry-run plan
-- do not modify local Codex data
+- resolve the target to a unique full id or short id prefix
+- print the target short id, title, full id, updated time, and cwd
+- require the user to type the standard short id before deletion
+- refuse non-interactive execution unless `--force` is provided
 
 Execution behavior:
 
-- requires `--yes`
 - requires a unique thread id or unique short id prefix
 - requires backup creation
 - refuses active threads
 - runs verification after mutation
 
-Unsupported in `0.1`:
+`--force` skips only interactive confirmation. It does not skip schema validation, backup creation, active-thread checks, or verification.
 
-```bash
-codex-history purge --contains "keyword" --yes
-```
-
-`--contains` may print matching candidates, but must not execute purge in `0.1`.
+`--json purge <thread_id>` requires `--force`, because interactive confirmation is text-only.
 
 ## Exit Codes
 

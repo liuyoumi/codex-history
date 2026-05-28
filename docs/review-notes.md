@@ -6,7 +6,7 @@ Status: accepted for v0.1
 
 Questions:
 
-- Are `list`, `search`, `doctor`, and `purge` enough for `0.1`?
+- Are `list`, `doctor`, and `purge` enough for `0.1`?
 - Should `archive` be kept out of `0.1`?
 - Should backup be mandatory for `0.1`?
 
@@ -15,8 +15,8 @@ Decisions:
 - Include `doctor` in `0.1`.
 - Keep `archive` out of `0.1`.
 - Make backup mandatory in `0.1`.
-- Permit exact-title purge only when it resolves to one thread.
-- Refuse fuzzy destructive purge.
+- Keep destructive purge id-only.
+- Use `list --grep` to resolve human-readable text to an id before purge.
 - Support npm global install and `npx` usage.
 - Target macOS for verified `0.1` behavior.
 
@@ -46,33 +46,28 @@ Status: accepted for v0.1
 Questions:
 
 - What should count as an active thread?
-- Should purge by title require exact title only?
-- Should fuzzy matching be search-only and never delete directly?
+- Should purge accept title or fuzzy selectors?
 
 Decisions:
 
 - Treat active-thread detection conservatively.
-- Use exact-title matching only for destructive title resolution.
-- Keep fuzzy matching search-only in `0.1`.
+- Keep destructive purge id-only in `0.1`; use `list --grep` to find the id first.
 - Refuse purge if backup cannot be created.
 - Refuse purge if schema validation fails.
 - Refuse purge if verification cannot run.
 
 ## Final v0.1 Spec Status
 
-Status: ready for non-destructive implementation
+Status: implemented for v0.1 release candidate
 
 Allowed next work:
 
 - implement `doctor`
 - implement `list`
-- implement `search`
-- implement dry-run purge planning
+- implement `list --grep`
+- implement purge planning and guarded execution
 - add fixture tests
 
 Still blocked:
 
-- `purge --yes`
-- SQLite mutation against real Codex stores
-- JSON/JSONL mutation against real Codex stores
-- rollout file deletion
+- none for v0.1 release candidate

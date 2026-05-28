@@ -3,14 +3,8 @@ import path from "node:path";
 import { SafetyRefusalError, UsageError } from "./errors.js";
 import type { ResolvedPaths } from "./paths.js";
 import type { ThreadSummary } from "./threads.js";
-import { getThreadsByExactTitle, getThreadsByIdPrefix, searchThreads } from "./threads.js";
+import { getThreadsByIdPrefix } from "./threads.js";
 import { countWhereThreadId, openReadonlyDatabase, tableExists } from "../stores/sqlite.js";
-
-export type PurgeTargetInput = {
-  id?: string;
-  title?: string;
-  contains?: string;
-};
 
 export type StorePlan = {
   store: string;
@@ -22,63 +16,29 @@ export type StorePlan = {
 };
 
 export type PurgePlan = {
-  mode: "dry-run";
+  mode: "planned";
   target: ThreadSummary;
   stores: StorePlan[];
   warnings: string[];
 };
 
-export type ContainsResolution = {
-  kind: "contains_matches";
-  matches: ThreadSummary[];
-};
-
-export function resolvePurgeTarget(
-  paths: ResolvedPaths,
-  input: PurgeTargetInput,
-): ThreadSummary | ContainsResolution {
-  const selectors = [input.id, input.title, input.contains].filter(Boolean);
-  if (selectors.length !== 1) {
-    throw new UsageError("Provide exactly one target selector: --id, --title, or --contains.");
+export function resolvePurgeTarget(paths: ResolvedPaths, threadId: string): ThreadSummary {
+  if (!threadId.trim()) {
+    throw new UsageError("Provide a thread id or unique short id prefix.");
   }
 
-  if (input.contains) {
-    return {
-      kind: "contains_matches",
-      matches: searchThreads(paths, input.contains, { all: true, limit: 200 }),
-    };
+  const matches = getThreadsByIdPrefix(paths, threadId);
+  if (matches.length === 0) {
+    throw new UsageError(`No Codex thread found for id: ${threadId}`);
+  }
+  if (matches.length > 1) {
+    throw new SafetyRefusalError(`ID prefix matched ${matches.length} threads. Use a longer id prefix or full id.`);
   }
 
-  if (input.id) {
-    const matches = getThreadsByIdPrefix(paths, input.id);
-    if (matches.length === 0) {
-      throw new UsageError(`No Codex thread found for id: ${input.id}`);
-    }
-    if (matches.length > 1) {
-      throw new SafetyRefusalError(
-        `ID prefix matched ${matches.length} threads. Use a longer id prefix or full id.`,
-      );
-    }
-    return matches[0];
-  }
-
-  if (input.title) {
-    const matches = getThreadsByExactTitle(paths, input.title);
-    if (matches.length === 0) {
-      throw new UsageError(`No Codex thread found for exact title: ${input.title}`);
-    }
-    if (matches.length > 1) {
-      throw new SafetyRefusalError(
-        `Exact title matched ${matches.length} threads. Use --id after running search/list.`,
-      );
-    }
-    return matches[0];
-  }
-
-  throw new UsageError("No purge target provided.");
+  return matches[0];
 }
 
-export function buildDryRunPurgePlan(paths: ResolvedPaths, target: ThreadSummary): PurgePlan {
+export function buildPurgePlan(paths: ResolvedPaths, target: ThreadSummary): PurgePlan {
   const stores: StorePlan[] = [];
   const warnings: string[] = [];
 
@@ -99,7 +59,7 @@ export function buildDryRunPurgePlan(paths: ResolvedPaths, target: ThreadSummary
   }
 
   return {
-    mode: "dry-run",
+    mode: "planned",
     target,
     stores,
     warnings,

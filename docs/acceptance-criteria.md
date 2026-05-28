@@ -19,10 +19,9 @@ The `feat/history-cli-mvp` milestone is complete when:
 
 - `codex-history doctor` validates a fixture Codex home
 - `codex-history list` reads threads from a fixture `state_5.sqlite`
-- `codex-history search` matches title, id, first user message, preview, and cwd
-- `codex-history purge --id <id>` prints a dry-run plan without modifying data
-- `codex-history purge --title <title>` refuses duplicate exact-title matches
-- `codex-history purge --contains <keyword> --yes` refuses destructive execution
+- `codex-history list --grep <keyword>` matches displayed title, id, and cwd
+- `codex-history purge <id>` requires interactive short-id confirmation before mutation
+- `codex-history purge <id> --force` executes without interactive confirmation
 - `--codex-home <path>` works for all commands
 - `--json` returns machine-readable output for supported commands
 - tests do not read or write the developer's real `~/.codex`
@@ -32,7 +31,7 @@ The `feat/history-cli-mvp` milestone is complete when:
 
 The `feat/purge-safety` milestone is complete when:
 
-- [x] `purge --yes` requires a unique target
+- [x] `purge` requires a unique target
 - [x] backup is mandatory and includes a manifest
 - [x] schema validation runs before mutation
 - [x] active-thread protection runs before mutation

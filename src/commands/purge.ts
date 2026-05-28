@@ -1,26 +1,20 @@
 import type { ResolvedPaths } from "../core/paths.js";
-import { SafetyRefusalError } from "../core/errors.js";
 import { executePurge } from "../core/executor.js";
-import { buildDryRunPurgePlan, resolvePurgeTarget, type PurgeTargetInput } from "../core/planner.js";
+import { buildPurgePlan, resolvePurgeTarget, type PurgePlan } from "../core/planner.js";
 import { validateSupportedDataModel } from "../core/schema.js";
 
-export function purgeCommand(paths: ResolvedPaths, input: PurgeTargetInput, execute: boolean) {
-  validateSupportedDataModel(paths, { requireBackupHome: execute });
-  const target = resolvePurgeTarget(paths, input);
+export function planPurgeCommand(paths: ResolvedPaths, threadId: string): PurgePlan {
+  validateSupportedDataModel(paths);
+  const target = resolvePurgeTarget(paths, threadId);
+  return buildPurgePlan(paths, target);
+}
 
-  if ("kind" in target) {
-    if (execute) {
-      throw new SafetyRefusalError("--contains is search-only in v0.1 and cannot execute purge.");
-    }
+export function executePurgePlanCommand(paths: ResolvedPaths, plan: PurgePlan) {
+  validateSupportedDataModel(paths, { requireBackupHome: true });
+  return executePurge(paths, plan);
+}
 
-    return target;
-  }
-
-  const plan = buildDryRunPurgePlan(paths, target);
-
-  if (execute) {
-    return executePurge(paths, plan);
-  }
-
-  return plan;
+export function purgeCommand(paths: ResolvedPaths, threadId: string) {
+  const plan = planPurgeCommand(paths, threadId);
+  return executePurgePlanCommand(paths, plan);
 }

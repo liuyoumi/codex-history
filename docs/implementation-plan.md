@@ -7,9 +7,9 @@
 3. Implement `doctor`.
 4. Implement thread repository reads.
 5. Implement `list`.
-6. Implement `search`.
+6. Implement `list --grep`.
 7. Implement thread resolution for purge planning.
-8. Implement dry-run purge planner.
+8. Implement purge planner.
 9. Add JSON output.
 10. Start purge safety implementation only after MVP review.
 
@@ -22,7 +22,6 @@ src/
     doctor.ts
     list.ts
     purge.ts
-    search.ts
   core/
     paths.ts
     schema.ts
@@ -50,8 +49,8 @@ For `feat/history-cli-mvp`:
 feat: add codex home path resolution
 feat: add codex data model doctor
 feat: add thread listing
-feat: add thread search
-feat: add dry-run purge planner
+feat: add thread filtering
+feat: add purge planner
 test: add fixture coverage for mvp commands
 ```
 
@@ -69,5 +68,4 @@ test: add fixture coverage for purge execution
 
 `feat/history-cli-mvp` must not modify real Codex data.
 
-`feat/purge-safety` may implement destructive behavior, but tests must use temporary fixtures and the command must remain dry-run by default.
-
+`feat/purge-safety` may implement destructive behavior, but tests must use temporary fixtures and the command must require explicit confirmation or `--force`.

@@ -24,17 +24,10 @@ The implementation should keep path handling portable enough for future Windows 
 
 ```bash
 codex-history list
-codex-history search "keyword"
-codex-history purge --id <thread_id> --dry-run
-codex-history purge --id <thread_id> --yes
+codex-history list --grep "keyword"
+codex-history purge <thread_id>
+codex-history purge <thread_id> --force
 codex-history doctor
-```
-
-Planned resolution helpers:
-
-```bash
-codex-history purge --title "exact title"
-codex-history purge --contains "keyword"
 ```
 
 Deletion must internally resolve to exactly one Codex thread id before modifying local data.
@@ -43,12 +36,12 @@ Deletion must internally resolve to exactly one Codex thread id before modifying
 
 ## User Workflow
 
-1. User lists or searches conversations.
+1. User lists or filters conversations.
 2. Tool displays candidate thread id, title, updated time, cwd, and rollout path.
-3. User runs a dry-run purge.
-4. Tool reports every planned file and database mutation.
-5. User reruns with `--yes` to execute.
-6. Tool verifies that the target thread id is no longer present in supported local Codex data stores.
+3. User runs `purge <id>`.
+4. Tool displays the resolved target title, full id, updated time, and cwd.
+5. User types the standard short id to confirm deletion.
+6. Tool creates a backup, executes purge, and verifies that the target thread id is no longer present in supported local Codex data stores.
 
 ## Non-Goals
 
@@ -64,11 +57,8 @@ Deletion must internally resolve to exactly one Codex thread id before modifying
 Version `0.1` should support:
 
 - list local threads from `~/.codex/state_5.sqlite`
-- search by title and first-message preview
-- dry-run purge planning
+- filter by displayed title, id, and cwd with `list --grep`
 - purge by unique thread id
-- exact-title purge only when it resolves to one thread
-- keyword search that prints candidates but does not delete directly
 - remove related local records from supported Codex stores
 - `doctor` command for data model checks
 - fixture-based tests for purge planning and purge execution
@@ -78,12 +68,10 @@ Version `0.1` should support:
 
 The tool must make destructive behavior intentionally boring and hard to trigger by accident.
 
-- `purge` without `--yes` is always a dry run.
-- `purge --contains` is search-only in `0.1` and must refuse execution.
-- `purge --title` requires exact title match.
-- exact title matches that return more than one thread must refuse execution.
-- every purge plan must show the resolved thread id before deletion.
-- every purge plan must show all known stores that will be touched.
+- `purge` must show the resolved thread id before deletion.
+- interactive purge requires typing the standard short id before deletion.
+- non-interactive purge requires `--force`.
+- `--force` skips only interactive confirmation.
 - successful purge must print a verification summary.
 
 ## Backup Requirements
@@ -111,6 +99,6 @@ Fail without modifying data when:
 - selected thread cannot be resolved uniquely
 - selected thread appears active
 - backup creation fails
-- dry-run plan cannot account for a supported store
+- purge plan cannot account for a supported store
 
 If purge starts and a later step fails, the tool must report partial work and verification failures clearly.

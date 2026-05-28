@@ -4,8 +4,7 @@ import Database from "better-sqlite3";
 import { afterEach, describe, expect, it } from "vitest";
 import { doctorCommand } from "../src/commands/doctor.js";
 import { listCommand } from "../src/commands/list.js";
-import { purgeCommand } from "../src/commands/purge.js";
-import { searchCommand } from "../src/commands/search.js";
+import { planPurgeCommand, purgeCommand } from "../src/commands/purge.js";
 import { SafetyRefusalError } from "../src/core/errors.js";
 import { createCodexFixture } from "./helpers/fixture.js";
 
@@ -44,69 +43,43 @@ describe("mvp commands", () => {
     expect(threads).toHaveLength(3);
   });
 
-  it("searches displayed thread titles without matching prompt bodies", () => {
+  it("greps displayed thread titles without matching prompt bodies", () => {
     const fixture = createCodexFixture();
-    const titleMatches = searchCommand(fixture.paths, "Keep", { all: true });
-    const promptMatches = searchCommand(fixture.paths, "please delete", { all: true });
+    const titleMatches = listCommand(fixture.paths, { all: true, grep: "Keep" });
+    const promptMatches = listCommand(fixture.paths, { all: true, grep: "please delete" });
 
     expect(titleMatches.map((thread) => thread.id)).toEqual(["thread-2"]);
     expect(promptMatches).toHaveLength(0);
   });
 
-  it("applies search limits after matching all displayed titles", () => {
+  it("applies list limits after grepping all displayed titles", () => {
     const fixture = createCodexFixture();
-    const matches = searchCommand(fixture.paths, "Keep", { all: true, limit: 1 });
+    const matches = listCommand(fixture.paths, { all: true, grep: "Keep", limit: 1 });
 
     expect(matches.map((thread) => thread.id)).toEqual(["thread-2"]);
   });
 
-  it("builds a dry-run purge plan by id", () => {
+  it("builds a purge plan by id", () => {
     const fixture = createCodexFixture();
-    const plan = purgeCommand(fixture.paths, { id: "thread-1" }, false);
+    const plan = planPurgeCommand(fixture.paths, "thread-1");
 
-    expect("mode" in plan && plan.mode).toBe("dry-run");
-    if ("mode" in plan && plan.mode === "dry-run") {
-      expect(plan.target.id).toBe("thread-1");
-      expect(plan.stores.some((store) => store.store === "state_db.thread_dynamic_tools" && store.count === 1)).toBe(true);
-      expect(plan.stores.some((store) => store.store === "shell_snapshot" && store.exists)).toBe(true);
-    }
+    expect(plan.mode).toBe("planned");
+    expect(plan.target.id).toBe("thread-1");
+    expect(plan.stores.some((store) => store.store === "state_db.thread_dynamic_tools" && store.count === 1)).toBe(true);
+    expect(plan.stores.some((store) => store.store === "shell_snapshot" && store.exists)).toBe(true);
   });
 
   it("resolves a unique short id prefix for purge", () => {
     const fixture = createCodexFixture();
-    const plan = purgeCommand(fixture.paths, { id: "thread-1".slice(0, 8) }, false);
+    const plan = planPurgeCommand(fixture.paths, "thread-1".slice(0, 8));
 
-    expect("mode" in plan && plan.mode).toBe("dry-run");
-    if ("mode" in plan && plan.mode === "dry-run") {
-      expect(plan.target.id).toBe("thread-1");
-    }
-  });
-
-  it("refuses duplicate exact-title purge resolution", () => {
-    const fixture = createCodexFixture();
-
-    expect(() => purgeCommand(fixture.paths, { title: "Delete Me" }, false)).toThrow(SafetyRefusalError);
-  });
-
-  it("keeps contains matching search-only", () => {
-    const fixture = createCodexFixture();
-    const result = purgeCommand(fixture.paths, { contains: "delete" }, false);
-
-    expect("kind" in result && result.kind).toBe("contains_matches");
-    if ("kind" in result) {
-      expect(result.matches.length).toBeGreaterThan(0);
-    }
-  });
-
-  it("refuses contains execution", () => {
-    const fixture = createCodexFixture();
-
-    expect(() => purgeCommand(fixture.paths, { contains: "delete" }, true)).toThrow(SafetyRefusalError);
+    expect(plan.mode).toBe("planned");
+    expect(plan.target.id).toBe("thread-1");
   });
 
   it("executes purge with backup and verification in a fixture", () => {
     const fixture = createCodexFixture();
-    const result = purgeCommand(fixture.paths, { id: "thread-1" }, true);
+    const result = purgeCommand(fixture.paths, "thread-1");
 
     expect("mode" in result && result.mode).toBe("executed");
     if (!("mode" in result) || result.mode !== "executed") {
@@ -145,6 +118,6 @@ describe("mvp commands", () => {
     const fixture = createCodexFixture();
     process.env.CODEX_THREAD_ID = "thread-1";
 
-    expect(() => purgeCommand(fixture.paths, { id: "thread-1" }, true)).toThrow(SafetyRefusalError);
+    expect(() => purgeCommand(fixture.paths, "thread-1")).toThrow(SafetyRefusalError);
   });
 });

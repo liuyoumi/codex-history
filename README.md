@@ -1,54 +1,38 @@
 # codex-history
 
-Terminal tool for inspecting and safely purging local Codex conversation history.
+[English](README.md) | [简体中文](README.zh-CN.md)
 
-> Status: v0.1 release candidate. The CLI supports local discovery and guarded purge execution with mandatory backups.
+A small CLI for finding and removing local Codex conversation history.
 
-## Package
+`codex-history` works on local Codex data files on your machine. It lists conversations using the same short titles shown by Codex when available, lets you narrow the list with `--grep`, and deletes one resolved conversation only after confirmation.
+
+## Install
 
 ```bash
 npm install -g @asjk/codex-history
 ```
 
-Or run without installing:
+Or run it without installing:
 
 ```bash
 npx @asjk/codex-history doctor
 ```
 
-## CLI
+## Quick Start
 
 ```bash
 codex-history doctor
 codex-history list
-codex-history list --grep "keyword"
-codex-history list --pretty=medium
-codex-history purge <short_or_full_thread_id>
-codex-history purge <short_or_full_thread_id> --force
+codex-history list --grep "Astro"
+codex-history purge 019e6885
 ```
 
-`purge` is destructive after confirmation. It creates a backup first, refuses active-thread matches, mutates supported local Codex stores, and verifies remaining supported references.
-
-`list` defaults to one-line output, similar to `git log --oneline`. It shows the same compact conversation names Codex uses in its history list when available. Long fallback titles are truncated with `...`; prompt bodies are not printed.
-
-## Typical Workflow
-
-```bash
-codex-history doctor
-codex-history list --grep "conversation title"
-codex-history purge <thread_id>
-```
-
-`purge` shows the resolved target and asks you to type the standard short id before deleting. Use `--force` only when you intentionally want to skip interactive confirmation.
-
-Short ids from `list` can be used with `purge` as long as the prefix uniquely identifies one thread.
-
-Interactive confirmation looks like this:
+`purge` prints the resolved conversation and asks you to type the standard short id before it deletes anything:
 
 ```text
 About to purge this local Codex conversation:
 
-019e6885  Example conversation title
+019e6885  Implement Astro blog visual audit
 id: 019e6885-b5ae-7ae0-a50d-ce5f75b0ac08
 updated: 2026-05-28T03:16:01.959Z
 cwd: /Users/me/Projects/example
@@ -57,62 +41,86 @@ A backup will be created before deletion.
 Type 019e6885 to confirm:
 ```
 
-## Output Formats
+## Commands
+
+### `doctor`
+
+Check whether the local Codex data layout is supported by this version.
 
 ```bash
-codex-history list --pretty=oneline
+codex-history doctor
+```
+
+Run this first after installing, or after a Codex update.
+
+### `list`
+
+List local Codex conversations.
+
+```bash
+codex-history list
+codex-history list --grep "Astro"
+codex-history list --limit 20
 codex-history list --pretty=medium
 codex-history list --pretty=full
 ```
 
-`oneline` is the default. `medium` adds full id, update time, and cwd. `full` also adds creation time, archive state, and rollout path.
+Default output is one line per conversation:
 
-When `list` runs in an interactive terminal without `--limit`, the command reads all matching conversations and sends output through the system pager. Use `--limit` to cap rows. Piped or redirected output skips the pager automatically.
-
-## Targeting a Custom Codex Home
-
-Use `--codex-home` for testing against a disposable copy:
-
-```bash
-codex-history --codex-home /tmp/codex-home doctor
-codex-history --codex-home /tmp/codex-home purge <thread_id> --force
+```text
+019e6885  Implement Astro blog visual audit
+019e6874  Review Astro blog visual plan
 ```
 
-## JSON Output
+`--grep` filters by displayed title, thread id, and cwd. It does not search or print prompt bodies.
+
+`--pretty` formats:
+
+- `oneline`: short id and title
+- `medium`: full id, updated time, and cwd
+- `full`: `medium` plus created time, archive state, and rollout path
+
+When `list` runs in an interactive terminal without `--limit`, output is sent through the system pager. Piped or redirected output skips the pager automatically.
+
+### `purge`
+
+Remove one local Codex conversation by full id or unique short id prefix.
 
 ```bash
-codex-history --json list
-codex-history --json purge <thread_id> --force
+codex-history purge 019e6885
 ```
 
-## Safety and Limits
+For scripts or non-interactive shells, use `--force`:
 
-This tool only works on local Codex data stores on your machine.
+```bash
+codex-history purge 019e6885 --force
+```
 
-It does not claim to delete:
+`--force` skips only the interactive short-id confirmation. It still keeps schema validation, mandatory backup, active-thread protection, and post-purge verification.
 
-- OpenAI or Codex server-side records
-- OS backups, APFS snapshots, or Time Machine backups
-- terminal scrollback
-- user-created transcript copies
-- crash reports or unrelated app caches
+## Options
 
-Before executing purge, the tool:
+```bash
+codex-history --codex-home /path/to/.codex list
+codex-history --json list --grep "Astro"
+codex-history --json purge 019e6885 --force
+```
 
-- validates the local Codex data model
-- resolves the target to exactly one thread
-- creates a mandatory backup under `~/.codex-history/backups`
+- `--codex-home` defaults to `~/.codex`.
+- `--json` prints machine-readable output. For `purge`, JSON output requires `--force` because interactive confirmation is text-only.
+
+## Safety
+
+Before deleting, `codex-history`:
+
+- validates the supported Codex data model
+- resolves the target to exactly one conversation
 - refuses the currently active thread when detectable
-- verifies supported local stores after mutation
+- creates a mandatory backup under `~/.codex-history/backups`
+- updates supported SQLite, JSON, JSONL, rollout, and shell snapshot stores
+- verifies supported stores after mutation
 
-## Project Rules
-
-- Documentation must be finalized and reviewed before purge execution is implemented.
-- `purge` must resolve candidates to a unique Codex thread id before modifying files.
-- Interactive purge requires typing the standard short id before deletion unless `--force` is used.
-- Active threads must not be purged.
-- macOS is the first supported and verified platform.
-- Backups are mandatory before purge execution.
+This tool only changes local Codex data. It does not delete server-side OpenAI/Codex records, OS backups, terminal scrollback, crash reports, or user-created transcript copies.
 
 ## Development
 
@@ -123,13 +131,6 @@ npm test
 npm run build
 ```
 
-## Planning Docs
+## License
 
-- [Requirements](docs/requirements.md)
-- [CLI Spec](docs/cli-spec.md)
-- [Technical Design](docs/technical-design.md)
-- [Deletion Scope](docs/deletion-scope.md)
-- [Safety Checklist](docs/safety-checklist.md)
-- [Release Plan](docs/release-plan.md)
-- [Acceptance Criteria](docs/acceptance-criteria.md)
-- [Implementation Plan](docs/implementation-plan.md)
+MIT

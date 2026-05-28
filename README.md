@@ -9,13 +9,13 @@ A small CLI for finding and removing local Codex conversation history.
 ## Install
 
 ```bash
-npm install -g @asjk/codex-history
+npm install -g @liuyoumi/codex-history
 ```
 
 Or run it without installing:
 
 ```bash
-npx @asjk/codex-history doctor
+npx @liuyoumi/codex-history doctor
 ```
 
 ## Supported Platforms

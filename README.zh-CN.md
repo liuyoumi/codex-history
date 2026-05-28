@@ -9,13 +9,13 @@
 ## 安装
 
 ```bash
-npm install -g @asjk/codex-history
+npm install -g @liuyoumi/codex-history
 ```
 
 也可以不安装直接运行：
 
 ```bash
-npx @asjk/codex-history doctor
+npx @liuyoumi/codex-history doctor
 ```
 
 ## 支持平台

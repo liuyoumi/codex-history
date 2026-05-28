@@ -1,5 +1,5 @@
 {
-  "name": "@asjk/codex-history",
+  "name": "@liuyoumi/codex-history",
   "version": "0.1.0",
   "description": "CLI for listing and safely purging local Codex conversation history",
   "type": "module",
@@ -26,7 +26,7 @@
     "history",
     "purge"
   ],
-  "author": "asjk",
+  "author": "liuyoumi",
   "license": "MIT",
   "repository": {
     "type": "git",

@@ -44,6 +44,7 @@ export function createCodexFixture(): Fixture {
     [
       JSON.stringify({ id: "thread-1", thread_name: "Delete Me", updated_at: "2026-05-27T10:00:00Z" }),
       JSON.stringify({ id: "thread-2", thread_name: "Keep Me", updated_at: "2026-05-27T11:00:00Z" }),
+      JSON.stringify({ id: "thread-3", thread_name: "Delete Me", updated_at: "2026-05-27T12:00:00Z" }),
     ].join("\n") + "\n",
   );
   writeFileSync(
@@ -143,8 +144,30 @@ function createStateDb(filePath: string, firstRollout: string, secondRollout: st
     `);
 
     insert.run("thread-1", firstRollout, 1779860000, 1779861000, "/tmp/project-a", "Delete Me", "please delete", "delete preview", 1779861000000, 1779860000000);
-    insert.run("thread-2", secondRollout, 1779862000, 1779863000, "/tmp/project-b", "Keep Me", "keep this", "keep preview", 1779863000000, 1779862000000);
-    insert.run("thread-3", secondRollout, 1779864000, 1779865000, "/tmp/project-c", "Delete Me", "duplicate title", "duplicate preview", 1779865000000, 1779864000000);
+    insert.run(
+      "thread-2",
+      secondRollout,
+      1779862000,
+      1779863000,
+      "/tmp/project-b",
+      "This is a very long raw prompt title that should be hidden behind the session index name",
+      "keep this",
+      "keep preview",
+      1779863000000,
+      1779862000000,
+    );
+    insert.run(
+      "thread-3",
+      secondRollout,
+      1779864000,
+      1779865000,
+      "/tmp/project-c",
+      "This is a very long raw prompt title that should not be shown when session index has a shorter name",
+      "duplicate title",
+      "duplicate preview",
+      1779865000000,
+      1779864000000,
+    );
 
     db.prepare("insert into thread_dynamic_tools values (?, ?, ?, ?, ?)").run("thread-1", 0, "tool", "desc", "{}");
     db.prepare("insert into stage1_outputs values (?, ?, ?, ?, ?)").run("thread-1", 1, "memory", "summary", 1);
@@ -193,4 +216,3 @@ function createGoalsDb(filePath: string): void {
     db.close();
   }
 }
-

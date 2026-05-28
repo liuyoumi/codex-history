@@ -51,6 +51,10 @@ codex-history list --limit 20
 codex-history list --all
 codex-history list --archived
 codex-history list --cwd /path/to/project
+codex-history list --pretty=oneline
+codex-history list --pretty=medium
+codex-history list --pretty=full
+codex-history list --no-pager
 codex-history list --json
 ```
 
@@ -58,14 +62,25 @@ Default behavior:
 
 - show non-archived local threads
 - sort by `updated_at` descending
-- limit to 20 rows
+- show one-line rows
+- read all rows unless `--limit` is provided
+- use pager in an interactive terminal when no limit is provided
 
-Columns:
+`oneline` columns:
 
 - short id
 - title
+
+`medium` adds:
+
+- full id
 - updated time
 - cwd
+
+`full` adds:
+
+- created time
+- archive state
 - rollout status
 
 ## `search`
@@ -73,6 +88,8 @@ Columns:
 ```bash
 codex-history search "keyword"
 codex-history search "keyword" --all
+codex-history search "keyword" --pretty=medium
+codex-history search "keyword" --no-pager
 codex-history search "keyword" --json
 ```
 
@@ -80,11 +97,13 @@ Search fields:
 
 - thread id
 - title
-- first user message
-- preview
 - cwd
 
+Search reads all rows before applying `--limit`, so a cap only limits displayed matches.
+
 Search is case-insensitive for ASCII text. Locale-sensitive fuzzy matching is not required in `0.1`.
+
+Prompt bodies are not searched by default because this tool is meant to match Codex history list entries, not dump transcript content.
 
 ## `purge`
 
@@ -103,7 +122,7 @@ Default behavior:
 Execution behavior:
 
 - requires `--yes`
-- requires a unique thread id
+- requires a unique thread id or unique short id prefix
 - requires backup creation
 - refuses active threads
 - runs verification after mutation
@@ -122,4 +141,3 @@ codex-history purge --contains "keyword" --yes
 - `1`: validation failure, unsupported data model, or verification failure
 - `2`: invalid CLI arguments
 - `3`: destructive command refused for safety
-

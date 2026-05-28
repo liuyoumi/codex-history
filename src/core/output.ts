@@ -7,6 +7,10 @@ export function printOutput(value: unknown, mode: OutputMode): void {
   }
 
   if (typeof value === "string") {
+    if (value.length === 0) {
+      return;
+    }
+
     console.log(value);
     return;
   }
@@ -25,4 +29,3 @@ export function formatDate(valueMs: number | null): string {
 export function shortId(id: string): string {
   return id.length <= 8 ? id : id.slice(0, 8);
 }
-

@@ -1,9 +1,11 @@
 import type { ResolvedPaths } from "./paths.js";
 import { openReadonlyDatabase, quoteIdentifier } from "../stores/sqlite.js";
+import { readSessionIndex } from "../stores/session-index.js";
 
 export type ThreadSummary = {
   id: string;
   title: string;
+  sourceTitle: string;
   rolloutPath: string;
   createdAtMs: number;
   updatedAtMs: number;
@@ -35,7 +37,7 @@ type ThreadRow = {
 };
 
 export function listThreads(paths: ResolvedPaths, options: ListThreadsOptions = {}): ThreadSummary[] {
-  const limit = options.limit ?? 20;
+  const limit = options.limit;
   const where: string[] = [];
   const params: unknown[] = [];
 
@@ -53,11 +55,13 @@ export function listThreads(paths: ResolvedPaths, options: ListThreadsOptions = 
   }
 
   const whereClause = where.length > 0 ? `where ${where.join(" and ")}` : "";
-  const limitClause = Number.isFinite(limit) && limit > 0 ? "limit ?" : "";
+  const hasLimit = typeof limit === "number" && Number.isFinite(limit) && limit > 0;
+  const limitClause = hasLimit ? "limit ?" : "";
   if (limitClause) {
     params.push(limit);
   }
 
+  const sessionIndex = readSessionIndex(paths.sessionIndex);
   const db = openReadonlyDatabase(paths.stateDb);
   try {
     const rows = db
@@ -70,7 +74,7 @@ export function listThreads(paths: ResolvedPaths, options: ListThreadsOptions = 
       )
       .all(...params) as ThreadRow[];
 
-    return rows.map(mapThreadRow);
+    return rows.map((row) => mapThreadRow(row, sessionIndex));
   } finally {
     db.close();
   }
@@ -82,12 +86,10 @@ export function searchThreads(
   options: Omit<ListThreadsOptions, "limit"> & { limit?: number } = {},
 ): ThreadSummary[] {
   const normalizedKeyword = keyword.toLocaleLowerCase();
-  return listThreads(paths, { ...options, limit: options.limit ?? 200 }).filter((thread) => {
+  const matches = listThreads(paths, { ...options, limit: undefined }).filter((thread) => {
     const haystack = [
       thread.id,
       thread.title,
-      thread.firstUserMessage,
-      thread.preview,
       thread.cwd,
     ]
       .join("\n")
@@ -95,47 +97,65 @@ export function searchThreads(
 
     return haystack.includes(normalizedKeyword);
   });
+
+  const limit = options.limit;
+  return typeof limit === "number" && Number.isFinite(limit) && limit > 0 ? matches.slice(0, limit) : matches;
 }
 
 export function getThreadById(paths: ResolvedPaths, threadId: string): ThreadSummary | null {
-  const db = openReadonlyDatabase(paths.stateDb);
-  try {
-    const row = db
-      .prepare(
-        `select id, title, rollout_path, created_at, updated_at, created_at_ms, updated_at_ms, cwd, archived, first_user_message, preview
-         from threads
-         where id = ?`,
-      )
-      .get(threadId) as ThreadRow | undefined;
-
-    return row ? mapThreadRow(row) : null;
-  } finally {
-    db.close();
+  const idMatches = getThreadsByIdPrefix(paths, threadId);
+  if (idMatches.length !== 1) {
+    return null;
   }
+
+  return idMatches[0];
 }
 
-export function getThreadsByExactTitle(paths: ResolvedPaths, title: string): ThreadSummary[] {
+export function getThreadsByIdPrefix(paths: ResolvedPaths, idPrefix: string): ThreadSummary[] {
+  const sessionIndex = readSessionIndex(paths.sessionIndex);
   const db = openReadonlyDatabase(paths.stateDb);
   try {
     const rows = db
       .prepare(
         `select id, title, rollout_path, created_at, updated_at, created_at_ms, updated_at_ms, cwd, archived, first_user_message, preview
          from threads
-         where title = ?
+         where id like ?
          order by coalesce(updated_at_ms, updated_at * 1000) desc, id desc`,
       )
-      .all(title) as ThreadRow[];
+      .all(`${escapeLike(idPrefix)}%`) as ThreadRow[];
 
-    return rows.map(mapThreadRow);
+    return rows.map((row) => mapThreadRow(row, sessionIndex));
   } finally {
     db.close();
   }
 }
 
-function mapThreadRow(row: ThreadRow): ThreadSummary {
+export function getThreadsByExactTitle(paths: ResolvedPaths, title: string): ThreadSummary[] {
+  const sessionIndex = readSessionIndex(paths.sessionIndex);
+  const db = openReadonlyDatabase(paths.stateDb);
+  try {
+    const rows = db
+      .prepare(
+        `select id, title, rollout_path, created_at, updated_at, created_at_ms, updated_at_ms, cwd, archived, first_user_message, preview
+         from threads
+         order by coalesce(updated_at_ms, updated_at * 1000) desc, id desc`,
+      )
+      .all() as ThreadRow[];
+
+    return rows.map((row) => mapThreadRow(row, sessionIndex)).filter((thread) => thread.title === title);
+  } finally {
+    db.close();
+  }
+}
+
+function mapThreadRow(row: ThreadRow, sessionIndex: Map<string, { threadName: string }>): ThreadSummary {
+  const sourceTitle = row.title;
+  const displayTitle = sessionIndex.get(row.id)?.threadName || sourceTitle;
+
   return {
     id: row.id,
-    title: row.title,
+    title: displayTitle,
+    sourceTitle,
     rolloutPath: row.rollout_path,
     createdAtMs: row.created_at_ms ?? row.created_at * 1000,
     updatedAtMs: row.updated_at_ms ?? row.updated_at * 1000,
@@ -144,4 +164,8 @@ function mapThreadRow(row: ThreadRow): ThreadSummary {
     firstUserMessage: row.first_user_message,
     preview: row.preview,
   };
+}
+
+function escapeLike(value: string): string {
+  return value.replaceAll("\\", "\\\\").replaceAll("%", "\\%").replaceAll("_", "\\_");
 }

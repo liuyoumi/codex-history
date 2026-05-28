@@ -34,15 +34,30 @@ describe("mvp commands", () => {
 
     expect(threads).toHaveLength(3);
     expect(threads[0]?.id).toBe("thread-3");
+    expect(threads.find((thread) => thread.id === "thread-2")?.title).toBe("Keep Me");
   });
 
-  it("searches thread title and prompt fields", () => {
+  it("lists all matching threads when no limit is provided", () => {
+    const fixture = createCodexFixture();
+    const threads = listCommand(fixture.paths);
+
+    expect(threads).toHaveLength(3);
+  });
+
+  it("searches displayed thread titles without matching prompt bodies", () => {
     const fixture = createCodexFixture();
     const titleMatches = searchCommand(fixture.paths, "Keep", { all: true });
     const promptMatches = searchCommand(fixture.paths, "please delete", { all: true });
 
     expect(titleMatches.map((thread) => thread.id)).toEqual(["thread-2"]);
-    expect(promptMatches.map((thread) => thread.id)).toContain("thread-1");
+    expect(promptMatches).toHaveLength(0);
+  });
+
+  it("applies search limits after matching all displayed titles", () => {
+    const fixture = createCodexFixture();
+    const matches = searchCommand(fixture.paths, "Keep", { all: true, limit: 1 });
+
+    expect(matches.map((thread) => thread.id)).toEqual(["thread-2"]);
   });
 
   it("builds a dry-run purge plan by id", () => {
@@ -54,6 +69,16 @@ describe("mvp commands", () => {
       expect(plan.target.id).toBe("thread-1");
       expect(plan.stores.some((store) => store.store === "state_db.thread_dynamic_tools" && store.count === 1)).toBe(true);
       expect(plan.stores.some((store) => store.store === "shell_snapshot" && store.exists)).toBe(true);
+    }
+  });
+
+  it("resolves a unique short id prefix for purge", () => {
+    const fixture = createCodexFixture();
+    const plan = purgeCommand(fixture.paths, { id: "thread-1".slice(0, 8) }, false);
+
+    expect("mode" in plan && plan.mode).toBe("dry-run");
+    if ("mode" in plan && plan.mode === "dry-run") {
+      expect(plan.target.id).toBe("thread-1");
     }
   });
 

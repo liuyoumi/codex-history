@@ -11,8 +11,7 @@
     "README.md",
     "README.zh-CN.md",
     "CHANGELOG.md",
-    "LICENSE",
-    "docs"
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsup src/cli.ts --format esm --dts --clean",

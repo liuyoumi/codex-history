@@ -11,7 +11,7 @@ The specification is ready for implementation when:
 - safety checklist defines purge guards
 - review notes mark product, technical, and safety reviews accepted
 
-Current status: accepted for non-destructive implementation.
+Current status: implemented for the v0.1 release candidate.
 
 ## Non-Destructive MVP Gate
 
@@ -42,14 +42,14 @@ The `feat/purge-safety` milestone is complete when:
 - [x] verification failure exits non-zero
 - [x] destructive tests run only against temporary fixtures
 
-Current status: implemented in `feat/purge-safety`; pending broader manual verification before release.
+Current status: implemented for the v0.1 release candidate.
 
 ## Release Gate
 
 The `release/v0.1.0` milestone is complete when:
 
-- README documents install, usage, and risks
-- CHANGELOG includes the first release notes
-- package metadata is ready for npm
-- macOS manual verification is recorded
-- GitHub repository has a release branch
+- [x] README documents install, usage, and risks
+- [x] CHANGELOG includes the first release notes
+- [x] package metadata is ready for npm
+- [x] macOS manual verification is recorded
+- [x] GitHub repository has a release branch

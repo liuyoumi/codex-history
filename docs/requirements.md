@@ -12,7 +12,6 @@ The tool should satisfy users who want a conversation to stop appearing in Codex
 - npm package: `@liuyoumi/codex-history`
 - CLI command: `codex-history`
 - Repository: `git@github.com:liuyoumi/codex-history.git`
-- Local path: `/Users/lg/Projects/codex-history`
 
 ## Initial Platform
 

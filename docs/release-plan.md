@@ -60,7 +60,7 @@ Exit criteria:
 - [x] active-thread protection exists
 - [x] `purge` requires exact unique target
 - [x] verification failures exit non-zero
-- [ ] macOS manual verification against a disposable Codex home
+- [x] macOS release-candidate verification is recorded in `docs/manual-verification.md`
 
 ## Milestone 4: First Release
 

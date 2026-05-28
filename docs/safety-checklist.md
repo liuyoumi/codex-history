@@ -2,39 +2,39 @@
 
 ## Before Purge
 
-- [ ] Resolve user input to exactly one thread id.
-- [ ] Show short id, title, full id, updated time, and cwd.
-- [ ] Require interactive short-id confirmation unless `--force` is used.
-- [ ] Refuse to purge active thread.
-- [ ] Refuse fuzzy destructive deletion.
-- [ ] Validate SQLite schema.
-- [ ] Validate JSON file shapes.
-- [ ] Build complete purge plan before changing anything.
-- [ ] Create backup.
-- [ ] Refuse purge when backup creation fails.
+- [x] Resolve user input to exactly one thread id.
+- [x] Show title, full id, cwd, and updated time before confirmation.
+- [x] Require interactive short-id confirmation unless `--force` is used.
+- [x] Refuse to purge active thread.
+- [x] Refuse fuzzy destructive deletion.
+- [x] Validate SQLite schema.
+- [x] Validate JSON file shapes.
+- [x] Build complete purge plan before changing anything.
+- [x] Create backup.
+- [x] Refuse purge when backup creation fails.
 
 ## During Purge
 
-- [ ] Use SQLite transactions.
-- [ ] Avoid broad recursive deletion.
-- [ ] Use structural JSON parsing and writing.
-- [ ] Stop on unexpected schema or parse failure.
-- [ ] Keep a machine-readable operation report.
-- [ ] Checkpoint SQLite WAL files after mutation.
+- [x] Use SQLite transactions.
+- [x] Avoid broad recursive deletion.
+- [x] Use structural JSON parsing and writing.
+- [x] Stop on unexpected schema or parse failure.
+- [x] Keep a machine-readable operation report.
+- [x] Checkpoint SQLite WAL files after mutation.
 
 ## After Purge
 
-- [ ] Run WAL checkpoints.
-- [ ] Optionally run `VACUUM`.
-- [ ] Verify supported stores no longer reference the target thread id.
-- [ ] Print any remaining references.
-- [ ] Exit non-zero if verification fails.
+- [x] Run WAL checkpoints.
+- [x] Skip automatic `VACUUM` in v0.1 by design.
+- [x] Verify supported stores no longer reference the target thread id.
+- [x] Print any remaining references.
+- [x] Exit non-zero if verification fails.
 
 ## Release Gate
 
-- [ ] `npm run typecheck` passes.
-- [ ] `npm run build` passes.
-- [ ] Tests pass against fixtures.
-- [ ] README includes risk disclaimer.
-- [ ] README documents that server-side deletion is not guaranteed.
-- [ ] macOS manual verification notes are recorded.
+- [x] `npm run typecheck` passes.
+- [x] `npm run build` passes.
+- [x] Tests pass against fixtures.
+- [x] README includes risk disclaimer.
+- [x] README documents that server-side deletion is not guaranteed.
+- [x] macOS manual verification notes are recorded.

@@ -9,14 +9,19 @@
 ## 安装
 
 ```bash
-npm install -g @asjk/codex-history
+npm install -g @liuyoumi/codex-history
 ```
 
 也可以不安装直接运行：
 
 ```bash
-npx @asjk/codex-history doctor
+npx @liuyoumi/codex-history doctor
 ```
+
+## 支持平台
+
+- macOS：v0.1 已验证
+- Windows/Linux：暂未验证
 
 ## 快速开始
 
@@ -32,16 +37,23 @@ codex-history purge 019e6885
 ```text
 About to purge this local Codex conversation:
 
-019e6885  实施 Astro 博客视觉审计工具
+title: 实施 Astro 博客视觉审计工具
 id: 019e6885-b5ae-7ae0-a50d-ce5f75b0ac08
-updated: 2026-05-28T03:16:01.959Z
 cwd: /Users/me/Projects/example
+updated: 2026-05-28T03:16:01.959Z
 
 A backup will be created before deletion.
 Type 019e6885 to confirm:
 ```
 
 ## 命令
+
+| 命令 | 说明 |
+| --- | --- |
+| `codex-history doctor` | 检查当前本地 Codex 数据结构是否受支持。 |
+| `codex-history list` | 列出本地对话。 |
+| `codex-history list --grep <keyword>` | 按标题、id 或 cwd 过滤对话。 |
+| `codex-history purge <id>` | 确认后删除一条解析到的本地对话。 |
 
 ### `doctor`
 
@@ -51,7 +63,7 @@ Type 019e6885 to confirm:
 codex-history doctor
 ```
 
-建议安装后先跑一次；Codex 更新后也可以再跑一次。
+建议安装后先跑一次；Codex 更新后也可以再跑一次。如果当前数据结构不受支持，删除命令会拒绝执行，而不是猜测应该怎么删。
 
 ### `list`
 
@@ -73,6 +85,16 @@ codex-history list --pretty=full
 ```
 
 `--grep` 会按显示标题、线程 id、cwd 过滤。它不会搜索或输出对话正文。
+
+执行 `purge` 时，可以使用 `list` 里显示的短 id，也可以粘贴完整 thread id。
+
+默认情况下，`list` 只显示未归档对话。使用 `--archived` 只看已归档对话，使用 `--all` 同时查看已归档和未归档对话。
+
+如果 grep 关键词里有空格，请加引号：
+
+```bash
+codex-history list --grep "Astro 博客"
+```
 
 `--pretty` 支持：
 
@@ -108,6 +130,7 @@ codex-history --json purge 019e6885 --force
 
 - `--codex-home` 默认是 `~/.codex`。
 - `--json` 输出机器可读的 JSON。`purge` 使用 JSON 输出时必须加 `--force`，因为交互确认只适合文本模式。
+- 颜色只会在交互式终端中启用，并遵守 `NO_COLOR`。
 
 ## 安全机制
 
@@ -117,10 +140,30 @@ codex-history --json purge 019e6885 --force
 - 将目标解析到唯一一条对话
 - 在可检测时拒绝删除当前 active thread
 - 在 `~/.codex-history/backups` 下创建强制备份
-- 更新受支持的 SQLite、JSON、JSONL、rollout、shell snapshot 数据
+- 从受支持的本地 Codex 数据中移除已知引用
 - 删除后扫描受支持的数据存储，确认目标引用已经移除
 
 这个工具只处理本地 Codex 数据。它不会删除 OpenAI/Codex 服务端记录、系统备份、终端滚动历史、崩溃报告，或你手动保存过的对话副本。
+
+如果 Codex Desktop 已经打开了你要删除的对话，删除后请先退出或重启 Codex，再继续使用。运行中的 Codex 进程可能仍然在内存里保留旧对话；如果继续在那个旧窗口里聊天，可能会为同一个 thread 重新写入本地数据。
+
+## Q&A
+
+### 会删除 Codex 服务端数据吗？
+
+不会。它只修改你机器上受支持的本地文件。
+
+### 备份在哪里？
+
+备份会写入 `~/.codex-history/backups`。
+
+### 删除后还能恢复吗？
+
+工具会在删除前创建备份，但 v0.1 还没有自动恢复命令。请把 `purge` 当作破坏性操作对待。
+
+### 删除后需要重启 Codex 吗？
+
+建议重启，尤其是 Codex Desktop。`purge` 修改的是磁盘上的本地文件，但正在运行的 Codex 进程可能不会立刻刷新内存里的历史列表。继续工作前，最好先重启 Codex。
 
 ## 开发
 

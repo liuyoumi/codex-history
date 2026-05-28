@@ -9,14 +9,19 @@ A small CLI for finding and removing local Codex conversation history.
 ## Install
 
 ```bash
-npm install -g @asjk/codex-history
+npm install -g @liuyoumi/codex-history
 ```
 
 Or run it without installing:
 
 ```bash
-npx @asjk/codex-history doctor
+npx @liuyoumi/codex-history doctor
 ```
+
+## Supported Platforms
+
+- macOS: verified for v0.1
+- Windows/Linux: not verified yet
 
 ## Quick Start
 
@@ -32,16 +37,23 @@ codex-history purge 019e6885
 ```text
 About to purge this local Codex conversation:
 
-019e6885  Implement Astro blog visual audit
+title: Implement Astro blog visual audit
 id: 019e6885-b5ae-7ae0-a50d-ce5f75b0ac08
-updated: 2026-05-28T03:16:01.959Z
 cwd: /Users/me/Projects/example
+updated: 2026-05-28T03:16:01.959Z
 
 A backup will be created before deletion.
 Type 019e6885 to confirm:
 ```
 
 ## Commands
+
+| Command | Description |
+| --- | --- |
+| `codex-history doctor` | Check whether the local Codex data layout is supported. |
+| `codex-history list` | List local conversations. |
+| `codex-history list --grep <keyword>` | Filter conversations by title, id, or cwd. |
+| `codex-history purge <id>` | Remove one resolved local conversation after confirmation. |
 
 ### `doctor`
 
@@ -51,7 +63,7 @@ Check whether the local Codex data layout is supported by this version.
 codex-history doctor
 ```
 
-Run this first after installing, or after a Codex update.
+Run this first after installing, or after a Codex update. If the local data layout is not supported, destructive commands fail closed instead of guessing how to delete.
 
 ### `list`
 
@@ -73,6 +85,16 @@ Default output is one line per conversation:
 ```
 
 `--grep` filters by displayed title, thread id, and cwd. It does not search or print prompt bodies.
+
+Use the short id shown by `list`, or paste a full thread id, when running `purge`.
+
+By default, `list` shows non-archived conversations. Use `--archived` for archived conversations only, or `--all` for both archived and non-archived conversations.
+
+Wrap grep text in quotes when it contains spaces:
+
+```bash
+codex-history list --grep "Astro blog"
+```
 
 `--pretty` formats:
 
@@ -108,6 +130,7 @@ codex-history --json purge 019e6885 --force
 
 - `--codex-home` defaults to `~/.codex`.
 - `--json` prints machine-readable output. For `purge`, JSON output requires `--force` because interactive confirmation is text-only.
+- Color is enabled only in interactive terminals and respects `NO_COLOR`.
 
 ## Safety
 
@@ -117,10 +140,30 @@ Before deleting, `codex-history`:
 - resolves the target to exactly one conversation
 - refuses the currently active thread when detectable
 - creates a mandatory backup under `~/.codex-history/backups`
-- updates supported SQLite, JSON, JSONL, rollout, and shell snapshot stores
+- removes known references from supported local Codex stores
 - verifies supported stores after mutation
 
 This tool only changes local Codex data. It does not delete server-side OpenAI/Codex records, OS backups, terminal scrollback, crash reports, or user-created transcript copies.
+
+If Codex Desktop is already showing the conversation you purge, quit or restart Codex before using it again. A running Codex process may still hold the old conversation in memory, and continuing to chat in that old window can write new local data for the same thread.
+
+## Q&A
+
+### Does this delete server-side Codex data?
+
+No. It only modifies supported local files on your machine.
+
+### Where are backups stored?
+
+Backups are written under `~/.codex-history/backups`.
+
+### Can I recover a purged conversation?
+
+The tool creates a backup before deletion, but v0.1 does not include an automatic restore command. Treat `purge` as destructive.
+
+### Do I need to restart Codex after purging?
+
+Recommended, especially for Codex Desktop. `purge` updates local files on disk, but a running Codex process may not refresh its in-memory conversation list immediately. Restart Codex before continuing work.
 
 ## Development
 

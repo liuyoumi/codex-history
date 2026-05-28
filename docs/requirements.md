@@ -9,10 +9,9 @@ The tool should satisfy users who want a conversation to stop appearing in Codex
 ## Project Identity
 
 - Project name: `codex-history`
-- npm package: `@asjk/codex-history`
+- npm package: `@liuyoumi/codex-history`
 - CLI command: `codex-history`
 - Repository: `git@github.com:liuyoumi/codex-history.git`
-- Local path: `/Users/lg/Projects/codex-history`
 
 ## Initial Platform
 

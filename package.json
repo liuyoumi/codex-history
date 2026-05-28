@@ -1,18 +1,17 @@
 {
-  "name": "@asjk/codex-history",
-  "version": "0.1.0",
-  "description": "Terminal tool for inspecting and safely purging local Codex conversation history.",
+  "name": "@liuyoumi/codex-history",
+  "version": "0.1.1",
+  "description": "CLI for listing and safely purging local Codex conversation history",
   "type": "module",
   "bin": {
-    "codex-history": "./dist/cli.js"
+    "codex-history": "dist/cli.js"
   },
   "files": [
     "dist",
     "README.md",
     "README.zh-CN.md",
     "CHANGELOG.md",
-    "LICENSE",
-    "docs"
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsup src/cli.ts --format esm --dts --clean",
@@ -26,7 +25,7 @@
     "history",
     "purge"
   ],
-  "author": "asjk",
+  "author": "liuyoumi",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -36,11 +35,13 @@
     "url": "https://github.com/liuyoumi/codex-history/issues"
   },
   "homepage": "https://github.com/liuyoumi/codex-history#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
-    "@inquirer/prompts": "^7.2.1",
     "better-sqlite3": "^11.7.0",
     "commander": "^12.1.0"
   },

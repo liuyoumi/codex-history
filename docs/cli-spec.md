@@ -63,6 +63,7 @@ Default behavior:
 - show non-archived local threads
 - sort by `updated_at` descending
 - show one-line rows
+- read all rows unless `--limit` is provided
 - use pager in an interactive terminal when no limit is provided
 
 `oneline` columns:
@@ -97,6 +98,8 @@ Search fields:
 - thread id
 - title
 - cwd
+
+Search reads all rows before applying `--limit`, so a cap only limits displayed matches.
 
 Search is case-insensitive for ASCII text. Locale-sensitive fuzzy matching is not required in `0.1`.
 

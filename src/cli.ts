@@ -215,8 +215,15 @@ function formatThread(thread: ThreadSummary, pretty: PrettyFormat): string {
 }
 
 function pageText(text: string): string {
-  const pager = process.env.PAGER || "less";
-  const result = spawnSync(pager, [], {
+  const pagerCommand = process.env.PAGER || "less";
+  const [pager, ...configuredArgs] = pagerCommand.split(/\s+/).filter(Boolean);
+  const pagerArgs = configuredArgs.length === 0 && pager?.endsWith("less") ? ["-FRX"] : configuredArgs;
+
+  if (!pager) {
+    return text;
+  }
+
+  const result = spawnSync(pager, pagerArgs, {
     input: text,
     stdio: ["pipe", "inherit", "inherit"],
     encoding: "utf8",

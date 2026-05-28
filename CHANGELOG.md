@@ -4,7 +4,8 @@
 
 ### Documentation
 
-- Use Chinese as the only README language.
+- Use Chinese as the default README language.
+- Add an English README translation.
 - Add a generated README cover image.
 - Mark macOS, Windows, and Linux as verified in the README.
 

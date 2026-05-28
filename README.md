@@ -2,6 +2,8 @@
   <img src="https://raw.githubusercontent.com/liuyoumi/codex-history/main/assets/cover.png" alt="codex-history 封面" width="100%" />
 </p>
 
+[中文](README.md) | [English](README.en.md)
+
 一个用来查找并删除本地 Codex 对话历史的小型命令行工具。
 
 `codex-history` 只处理你机器上的本地 Codex 数据。它会尽量使用 Codex 对话列表里显示的短标题，支持用 `--grep` 缩小范围，并且只会在你确认目标后删除一条明确解析出来的对话。

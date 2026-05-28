@@ -5,7 +5,6 @@ import { createInterface } from "node:readline/promises";
 import { doctorCommand } from "./commands/doctor.js";
 import { listCommand } from "./commands/list.js";
 import { executePurgePlanCommand, planPurgeCommand } from "./commands/purge.js";
-import { searchCommand } from "./commands/search.js";
 import { CodexHistoryError, SafetyRefusalError, UsageError } from "./core/errors.js";
 import type { PurgeExecutionReport } from "./core/executor.js";
 import { formatDate, printOutput, shortId, type OutputMode } from "./core/output.js";
@@ -46,6 +45,7 @@ program
   .option("--all", "Include archived and non-archived threads")
   .option("--archived", "Show archived threads")
   .option("--cwd <path>", "Filter by exact working directory")
+  .option("--grep <keyword>", "Filter by title, id, or cwd keyword")
   .option("--pretty <format>", "Output format: oneline, medium, full", parsePretty, "oneline")
   .action((options) =>
     runCommand(() =>
@@ -55,28 +55,7 @@ program
           all: options.all,
           archived: options.archived,
           cwd: options.cwd,
-        }),
-        options.pretty,
-        shouldUsePager(options),
-      ),
-    ),
-  );
-
-program
-  .command("search")
-  .argument("<keyword>", "Title, id, or cwd keyword to search for")
-  .description("Search local Codex conversations.")
-  .option("--limit <number>", "Maximum matching rows to show", parseInteger)
-  .option("--all", "Include archived and non-archived threads")
-  .option("--archived", "Show archived threads")
-  .option("--pretty <format>", "Output format: oneline, medium, full", parsePretty, "oneline")
-  .action((keyword: string, options) =>
-    runCommand(() =>
-      formatThreads(
-        searchCommand(currentPaths(), keyword, {
-          limit: options.limit,
-          all: options.all,
-          archived: options.archived,
+          grep: options.grep,
         }),
         options.pretty,
         shouldUsePager(options),

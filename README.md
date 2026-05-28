@@ -21,21 +21,21 @@ npx @asjk/codex-history doctor
 ```bash
 codex-history doctor
 codex-history list
+codex-history list --grep "keyword"
 codex-history list --pretty=medium
-codex-history search "keyword"
 codex-history purge <short_or_full_thread_id>
 codex-history purge <short_or_full_thread_id> --force
 ```
 
 `purge` is destructive after confirmation. It creates a backup first, refuses active-thread matches, mutates supported local Codex stores, and verifies remaining supported references.
 
-`list` and `search` default to one-line output, similar to `git log --oneline`. They show the same compact conversation names Codex uses in its history list when available. Long fallback titles are truncated with `...`; prompt bodies are not printed.
+`list` defaults to one-line output, similar to `git log --oneline`. It shows the same compact conversation names Codex uses in its history list when available. Long fallback titles are truncated with `...`; prompt bodies are not printed.
 
 ## Typical Workflow
 
 ```bash
 codex-history doctor
-codex-history search "conversation title"
+codex-history list --grep "conversation title"
 codex-history purge <thread_id>
 ```
 
@@ -67,7 +67,7 @@ codex-history list --pretty=full
 
 `oneline` is the default. `medium` adds full id, update time, and cwd. `full` also adds creation time, archive state, and rollout path.
 
-When `list` or `search` runs in an interactive terminal without `--limit`, the command reads all matching conversations and sends output through the system pager. Use `--limit` to cap rows. Piped or redirected output skips the pager automatically.
+When `list` runs in an interactive terminal without `--limit`, the command reads all matching conversations and sends output through the system pager. Use `--limit` to cap rows. Piped or redirected output skips the pager automatically.
 
 ## Targeting a Custom Codex Home
 

@@ -7,7 +7,7 @@
 3. Implement `doctor`.
 4. Implement thread repository reads.
 5. Implement `list`.
-6. Implement `search`.
+6. Implement `list --grep`.
 7. Implement thread resolution for purge planning.
 8. Implement purge planner.
 9. Add JSON output.
@@ -22,7 +22,6 @@ src/
     doctor.ts
     list.ts
     purge.ts
-    search.ts
   core/
     paths.ts
     schema.ts
@@ -50,7 +49,7 @@ For `feat/history-cli-mvp`:
 feat: add codex home path resolution
 feat: add codex data model doctor
 feat: add thread listing
-feat: add thread search
+feat: add thread filtering
 feat: add purge planner
 test: add fixture coverage for mvp commands
 ```

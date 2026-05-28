@@ -24,7 +24,7 @@ The implementation should keep path handling portable enough for future Windows 
 
 ```bash
 codex-history list
-codex-history search "keyword"
+codex-history list --grep "keyword"
 codex-history purge <thread_id>
 codex-history purge <thread_id> --force
 codex-history doctor
@@ -36,7 +36,7 @@ Deletion must internally resolve to exactly one Codex thread id before modifying
 
 ## User Workflow
 
-1. User lists or searches conversations.
+1. User lists or filters conversations.
 2. Tool displays candidate thread id, title, updated time, cwd, and rollout path.
 3. User runs `purge <id>`.
 4. Tool displays the resolved target title, full id, updated time, and cwd.
@@ -57,7 +57,7 @@ Deletion must internally resolve to exactly one Codex thread id before modifying
 Version `0.1` should support:
 
 - list local threads from `~/.codex/state_5.sqlite`
-- search by displayed title, id, and cwd
+- filter by displayed title, id, and cwd with `list --grep`
 - purge by unique thread id
 - remove related local records from supported Codex stores
 - `doctor` command for data model checks

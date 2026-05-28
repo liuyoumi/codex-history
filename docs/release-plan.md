@@ -4,7 +4,7 @@
 
 - `chore/project-foundation`: initial project scaffold
 - `docs/finalize-spec`: reviewed product and technical specification
-- `feat/history-cli-mvp`: list, search, doctor, and purge planning
+- `feat/history-cli-mvp`: list, doctor, and purge planning
 - `feat/purge-safety`: destructive purge with backups and verification
 - `release/v0.1.0`: npm packaging and release notes
 
@@ -31,7 +31,7 @@ Required features:
 
 - `doctor`
 - `list`
-- `search`
+- `list --grep`
 - purge plan builder
 - JSON output
 - fixture test harness

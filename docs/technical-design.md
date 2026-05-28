@@ -31,7 +31,7 @@ Suggested modules:
 
 - `paths`: resolve Codex home, tool home, and platform-specific paths
 - `schema`: validate supported Codex data model
-- `threads`: list, search, and resolve thread candidates
+- `threads`: list, filter, and resolve thread candidates
 - `planner`: build purge plans before mutation
 - `backup`: copy all files required for rollback or manual inspection
 - `sqlite`: execute database mutations with transactions and checkpoints

@@ -51,6 +51,7 @@ codex-history list --limit 20
 codex-history list --all
 codex-history list --archived
 codex-history list --cwd /path/to/project
+codex-history list --grep "keyword"
 codex-history list --pretty=oneline
 codex-history list --pretty=medium
 codex-history list --pretty=full
@@ -63,6 +64,7 @@ Default behavior:
 - sort by `updated_at` descending
 - show one-line rows
 - read all rows unless `--limit` is provided
+- filter by thread id, title, and cwd when `--grep` is provided
 - use pager in an interactive terminal when no limit is provided
 - skip pager automatically when output is piped or redirected
 
@@ -83,26 +85,17 @@ Default behavior:
 - archive state
 - rollout status
 
-## `search`
-
-```bash
-codex-history search "keyword"
-codex-history search "keyword" --all
-codex-history search "keyword" --pretty=medium
-codex-history search "keyword" --json
-```
-
-Search fields:
+`--grep` fields:
 
 - thread id
 - title
 - cwd
 
-Search reads all rows before applying `--limit`, so a cap only limits displayed matches.
+`--grep` reads all rows before applying `--limit`, so a cap only limits displayed matches.
 
-Search is case-insensitive for ASCII text. Locale-sensitive fuzzy matching is not required in `0.1`.
+`--grep` is case-insensitive for ASCII text. Locale-sensitive fuzzy matching is not required in `0.1`.
 
-Prompt bodies are not searched by default because this tool is meant to match Codex history list entries, not dump transcript content.
+Prompt bodies are not searched because this tool is meant to match Codex history list entries, not dump transcript content.
 
 ## `purge`
 

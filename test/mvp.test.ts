@@ -5,7 +5,6 @@ import { afterEach, describe, expect, it } from "vitest";
 import { doctorCommand } from "../src/commands/doctor.js";
 import { listCommand } from "../src/commands/list.js";
 import { planPurgeCommand, purgeCommand } from "../src/commands/purge.js";
-import { searchCommand } from "../src/commands/search.js";
 import { SafetyRefusalError } from "../src/core/errors.js";
 import { createCodexFixture } from "./helpers/fixture.js";
 
@@ -44,18 +43,18 @@ describe("mvp commands", () => {
     expect(threads).toHaveLength(3);
   });
 
-  it("searches displayed thread titles without matching prompt bodies", () => {
+  it("greps displayed thread titles without matching prompt bodies", () => {
     const fixture = createCodexFixture();
-    const titleMatches = searchCommand(fixture.paths, "Keep", { all: true });
-    const promptMatches = searchCommand(fixture.paths, "please delete", { all: true });
+    const titleMatches = listCommand(fixture.paths, { all: true, grep: "Keep" });
+    const promptMatches = listCommand(fixture.paths, { all: true, grep: "please delete" });
 
     expect(titleMatches.map((thread) => thread.id)).toEqual(["thread-2"]);
     expect(promptMatches).toHaveLength(0);
   });
 
-  it("applies search limits after matching all displayed titles", () => {
+  it("applies list limits after grepping all displayed titles", () => {
     const fixture = createCodexFixture();
-    const matches = searchCommand(fixture.paths, "Keep", { all: true, limit: 1 });
+    const matches = listCommand(fixture.paths, { all: true, grep: "Keep", limit: 1 });
 
     expect(matches.map((thread) => thread.id)).toEqual(["thread-2"]);
   });

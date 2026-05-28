@@ -21,7 +21,7 @@ node dist/cli.js list
 node dist/cli.js list --limit 3
 node dist/cli.js list --limit 3 --pretty=medium
 node dist/cli.js list --limit 1 --pretty=full
-node dist/cli.js search Astro --limit 1
+node dist/cli.js list --grep Astro --limit 1
 node dist/cli.js purge --help
 node dist/cli.js purge 019e6885
 node dist/cli.js purge 019e6885 # in a TTY, enter a wrong short id
@@ -35,7 +35,7 @@ Expected:
 - `doctor` reports the current local data model status. In a sandboxed environment, default backup directory creation may fail safely.
 - `list` prints all non-archived local conversations when stdout is non-interactive.
 - `list --limit 3` prints recent local conversations.
-- `search Astro --limit 1` prints one matching conversation.
+- `list --grep Astro --limit 1` prints one matching conversation.
 - `purge --help` documents `--force` and no longer documents `--yes`.
 - `purge 019e6885` refuses in a non-interactive shell before mutation.
 - interactive `purge 019e6885` shows target title/id/updated/cwd and refuses when the confirmation input is wrong.
@@ -53,7 +53,7 @@ Result:
 - `node dist/cli.js list --limit 3`: passed.
 - `node dist/cli.js list --limit 3 --pretty=medium`: passed.
 - `node dist/cli.js list --limit 1 --pretty=full`: passed.
-- `node dist/cli.js search Astro --limit 1`: passed.
+- `node dist/cli.js list --grep Astro --limit 1`: passed.
 - `node dist/cli.js purge --help`: passed.
 - `node dist/cli.js purge 019e6885`: refused in non-interactive shell before mutation.
 - interactive `node dist/cli.js purge 019e6885` with wrong confirmation: refused without mutation.

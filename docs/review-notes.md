@@ -6,7 +6,7 @@ Status: accepted for v0.1
 
 Questions:
 
-- Are `list`, `search`, `doctor`, and `purge` enough for `0.1`?
+- Are `list`, `doctor`, and `purge` enough for `0.1`?
 - Should `archive` be kept out of `0.1`?
 - Should backup be mandatory for `0.1`?
 
@@ -16,7 +16,7 @@ Decisions:
 - Keep `archive` out of `0.1`.
 - Make backup mandatory in `0.1`.
 - Keep destructive purge id-only.
-- Use `list` and `search` to resolve human-readable text to an id before purge.
+- Use `list --grep` to resolve human-readable text to an id before purge.
 - Support npm global install and `npx` usage.
 - Target macOS for verified `0.1` behavior.
 
@@ -51,7 +51,7 @@ Questions:
 Decisions:
 
 - Treat active-thread detection conservatively.
-- Keep destructive purge id-only in `0.1`; use `list` or `search` to find the id first.
+- Keep destructive purge id-only in `0.1`; use `list --grep` to find the id first.
 - Refuse purge if backup cannot be created.
 - Refuse purge if schema validation fails.
 - Refuse purge if verification cannot run.
@@ -64,7 +64,7 @@ Allowed next work:
 
 - implement `doctor`
 - implement `list`
-- implement `search`
+- implement `list --grep`
 - implement purge planning and guarded execution
 - add fixture tests
 

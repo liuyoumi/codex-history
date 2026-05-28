@@ -8,7 +8,7 @@ Initial release candidate.
 
 - `doctor` command for local Codex data model checks.
 - `list` command for local conversation discovery.
-- `search` command for displayed title, id, and cwd matching.
+- `list --grep` filtering for displayed title, id, and cwd matching.
 - `purge <id>` execution by full id or unique short id prefix.
 - Interactive purge confirmation by typing the standard short id.
 - `purge <id> --force` for non-interactive execution.

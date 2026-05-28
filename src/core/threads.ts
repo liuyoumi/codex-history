@@ -20,6 +20,7 @@ export type ListThreadsOptions = {
   archived?: boolean;
   all?: boolean;
   cwd?: string;
+  grep?: string;
 };
 
 type ThreadRow = {
@@ -56,7 +57,8 @@ export function listThreads(paths: ResolvedPaths, options: ListThreadsOptions = 
 
   const whereClause = where.length > 0 ? `where ${where.join(" and ")}` : "";
   const hasLimit = typeof limit === "number" && Number.isFinite(limit) && limit > 0;
-  const limitClause = hasLimit ? "limit ?" : "";
+  const shouldFilterAfterLoad = Boolean(options.grep);
+  const limitClause = hasLimit && !shouldFilterAfterLoad ? "limit ?" : "";
   if (limitClause) {
     params.push(limit);
   }
@@ -74,19 +76,18 @@ export function listThreads(paths: ResolvedPaths, options: ListThreadsOptions = 
       )
       .all(...params) as ThreadRow[];
 
-    return rows.map((row) => mapThreadRow(row, sessionIndex));
+    const threads = rows.map((row) => mapThreadRow(row, sessionIndex));
+    const filteredThreads = options.grep ? filterThreads(threads, options.grep) : threads;
+
+    return hasLimit && shouldFilterAfterLoad ? filteredThreads.slice(0, limit) : filteredThreads;
   } finally {
     db.close();
   }
 }
 
-export function searchThreads(
-  paths: ResolvedPaths,
-  keyword: string,
-  options: Omit<ListThreadsOptions, "limit"> & { limit?: number } = {},
-): ThreadSummary[] {
+function filterThreads(threads: ThreadSummary[], keyword: string): ThreadSummary[] {
   const normalizedKeyword = keyword.toLocaleLowerCase();
-  const matches = listThreads(paths, { ...options, limit: undefined }).filter((thread) => {
+  return threads.filter((thread) => {
     const haystack = [
       thread.id,
       thread.title,
@@ -97,9 +98,6 @@ export function searchThreads(
 
     return haystack.includes(normalizedKeyword);
   });
-
-  const limit = options.limit;
-  return typeof limit === "number" && Number.isFinite(limit) && limit > 0 ? matches.slice(0, limit) : matches;
 }
 
 export function getThreadById(paths: ResolvedPaths, threadId: string): ThreadSummary | null {

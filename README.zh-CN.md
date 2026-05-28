@@ -1,8 +1,5 @@
 # codex-history
 
-[![npm version](https://img.shields.io/npm/v/@asjk/codex-history.svg)](https://www.npmjs.com/package/@asjk/codex-history)
-[![license](https://img.shields.io/npm/l/@asjk/codex-history.svg)](LICENSE)
-
 [English](README.md) | [简体中文](README.zh-CN.md)
 
 一个用来查找并删除本地 Codex 对话历史的小型命令行工具。

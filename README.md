@@ -1,8 +1,5 @@
 # codex-history
 
-[![npm version](https://img.shields.io/npm/v/@asjk/codex-history.svg)](https://www.npmjs.com/package/@asjk/codex-history)
-[![license](https://img.shields.io/npm/l/@asjk/codex-history.svg)](LICENSE)
-
 [English](README.md) | [简体中文](README.zh-CN.md)
 
 A small CLI for finding and removing local Codex conversation history.

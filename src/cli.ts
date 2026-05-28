@@ -15,7 +15,7 @@ import type { ThreadSummary } from "./core/threads.js";
 
 const TITLE_MAX_LENGTH = 80;
 type PrettyFormat = "oneline" | "medium" | "full";
-type ColorName = "cyan" | "dim" | "green" | "red" | "yellow";
+type ColorName = "dim" | "green" | "red" | "yellow";
 
 const program = new Command();
 
@@ -152,7 +152,7 @@ async function confirmPurge(plan: PurgePlan): Promise<void> {
   });
 
   try {
-    const answer = await readline.question(`Type ${colorize("cyan", expected)} to confirm: `);
+    const answer = await readline.question(`Type ${colorize("yellow", expected)} to confirm: `);
     if (answer.trim() !== expected) {
       throw new SafetyRefusalError("Confirmation did not match. No local Codex data was modified.");
     }
@@ -192,7 +192,7 @@ function formatThreads(threads: ThreadSummary[], pretty: PrettyFormat = "oneline
 }
 
 function formatThread(thread: ThreadSummary, pretty: PrettyFormat): string {
-  const header = `${colorize("cyan", shortId(thread.id))}  ${displayTitle(thread.title)}`;
+  const header = `${colorize("yellow", shortId(thread.id))}  ${displayTitle(thread.title)}`;
 
   if (pretty === "oneline") {
     return header;
@@ -200,7 +200,7 @@ function formatThread(thread: ThreadSummary, pretty: PrettyFormat): string {
 
   const mediumLines = [
     header,
-    `  ${colorize("dim", "id:")} ${colorize("cyan", thread.id)}`,
+    `  ${colorize("dim", "id:")} ${colorize("yellow", thread.id)}`,
     `  ${colorize("dim", "updated:")} ${formatDate(thread.updatedAtMs)}`,
     `  ${colorize("dim", "cwd:")} ${colorize("dim", thread.cwd)}`,
   ];
@@ -248,7 +248,7 @@ function formatPurgeResult(result: PurgeExecutionReport): unknown {
     colorize("green", "Purge executed."),
     "",
     `Target: ${displayTitle(result.plan.target.title)}`,
-    `Thread id: ${colorize("cyan", result.plan.target.id)}`,
+    `Thread id: ${colorize("yellow", result.plan.target.id)}`,
     `Backup: ${colorize("dim", result.backup.backupDir)}`,
     "",
     "SQLite changes:",
@@ -281,8 +281,8 @@ function formatPurgeConfirmation(plan: PurgePlan): string {
   return [
     colorize("yellow", "About to purge this local Codex conversation:"),
     "",
-    `${colorize("cyan", shortId(plan.target.id))}  ${displayTitle(plan.target.title)}`,
-    `id: ${colorize("cyan", plan.target.id)}`,
+    `${colorize("yellow", shortId(plan.target.id))}  ${displayTitle(plan.target.title)}`,
+    `id: ${colorize("yellow", plan.target.id)}`,
     `updated: ${formatDate(plan.target.updatedAtMs)}`,
     `cwd: ${colorize("dim", plan.target.cwd)}`,
     "",
@@ -320,7 +320,6 @@ function applyColor(color: ColorName, value: string, enabled: boolean): string {
   }
 
   const codes: Record<ColorName, [number, number]> = {
-    cyan: [36, 39],
     dim: [2, 22],
     green: [32, 39],
     red: [31, 39],

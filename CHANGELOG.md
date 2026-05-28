@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2 - 2026-05-28
+
+### Documentation
+
+- Use Chinese as the only README language.
+- Add a generated README cover image.
+
 ## 0.1.1 - 2026-05-28
 
 ### Documentation

@@ -1,6 +1,6 @@
 {
   "name": "@liuyoumi/codex-history",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "CLI for listing and safely purging local Codex conversation history",
   "type": "module",
   "bin": {
@@ -9,7 +9,6 @@
   "files": [
     "dist",
     "README.md",
-    "README.zh-CN.md",
     "CHANGELOG.md",
     "LICENSE"
   ],

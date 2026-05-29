@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
 import { doctorCommand } from "./commands/doctor.js";
 import { listCommand } from "./commands/list.js";
@@ -16,13 +17,14 @@ import type { ThreadSummary } from "./core/threads.js";
 const TITLE_MAX_LENGTH = 80;
 type PrettyFormat = "oneline" | "medium" | "full";
 type ColorName = "dim" | "green" | "red" | "yellow";
+const packageVersion = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version as string;
 
 const program = new Command();
 
 program
   .name("codex-history")
   .description("Inspect and safely purge local Codex conversation history.")
-  .version("0.1.0")
+  .version(packageVersion)
   .option("--codex-home <path>", "Path to Codex home directory", "~/.codex")
   .option("--json", "Print machine-readable JSON output");
 

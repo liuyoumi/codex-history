@@ -1,17 +1,25 @@
 # Changelog
 
-## 0.1.2 - 2026-05-29
+## 0.1.3 - 2026-05-29
+
+### Changed
+
+- Remove purge backup creation and document `purge` as a permanent local deletion flow.
+- Report the CLI version from `package.json` instead of a stale hard-coded value.
+
+### Documentation
+
+- Refresh the README cover image to show only the terminal window.
+- Add agent workflow guidance for future implementation work.
+- Clarify the boundary between `AGENTS.md` and `docs/agent-workflow.md`.
+
+## 0.1.2 - 2026-05-28
 
 ### Documentation
 
 - Use Chinese as the default README language.
 - Add an English README translation.
-- Refresh the README cover image to focus on a single guarded `purge` command flow.
 - Add README badges and clearer macOS, Windows, and Linux support notes.
-
-### Changed
-
-- Remove purge backup creation and document `purge` as a permanent local deletion flow.
 
 ## 0.1.1 - 2026-05-28
 

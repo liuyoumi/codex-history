@@ -7,10 +7,10 @@ import { doctorCommand } from "./commands/doctor.js";
 import { listCommand } from "./commands/list.js";
 import { executePurgePlanCommand, planPurgeCommand } from "./commands/purge.js";
 import { executePurgeOrphansPlanCommand, planPurgeOrphansCommand } from "./commands/purge-orphans.js";
-import { CodexHistoryError, SafetyRefusalError, UsageError } from "./core/errors.js";
+import { CodexHistoryError, SafetyRefusalError } from "./core/errors.js";
 import type { PurgeExecutionReport } from "./core/executor.js";
 import { hasPurgeOrphansWork, type PurgeOrphansExecutionReport, type PurgeOrphansPlan } from "./core/orphans.js";
-import { formatDate, printOutput, shortId, type OutputMode } from "./core/output.js";
+import { formatDate, printOutput, shortId } from "./core/output.js";
 import { resolvePaths } from "./core/paths.js";
 import type { PurgePlan } from "./core/planner.js";
 import type { DoctorReport } from "./core/schema.js";
@@ -27,8 +27,7 @@ program
   .name("codex-history")
   .description("Inspect and safely purge local Codex conversation history.")
   .version(packageVersion)
-  .option("--codex-home <path>", "Path to Codex home directory", "~/.codex")
-  .option("--json", "Print machine-readable JSON output");
+  .option("--codex-home <path>", "Path to Codex home directory", "~/.codex");
 
 program
   .command("doctor")
@@ -79,10 +78,6 @@ program
       const plan = planPurgeCommand(paths, threadId);
       const force = Boolean(options.force);
 
-      if (currentOutputModeIsJson() && !force) {
-        throw new UsageError("JSON purge output requires --force because interactive confirmation is text-only.");
-      }
-
       if (!force) {
         await confirmPurge(plan);
       }
@@ -97,10 +92,6 @@ program
   .description("Purge orphaned local Codex data after target confirmation.")
   .action((options) =>
     runCommand(async () => {
-      if (currentOutputModeIsJson()) {
-        throw new UsageError("purge-orphans does not support JSON output.");
-      }
-
       const paths = currentPaths();
       const plan = planPurgeOrphansCommand(paths);
       const force = Boolean(options.force);
@@ -119,27 +110,18 @@ program
 
 await program.parseAsync();
 
-function currentOutputMode(): OutputMode {
-  return program.opts().json ? "json" : "text";
-}
-
 function currentPaths() {
   return resolvePaths(program.opts().codexHome);
 }
 
 async function runCommand(produce: () => unknown | Promise<unknown>): Promise<void> {
   try {
-    printOutput(await produce(), currentOutputMode());
+    printOutput(await produce());
   } catch (error) {
     const exitCode = error instanceof CodexHistoryError ? error.exitCode : 1;
     const message = error instanceof Error ? error.message : String(error);
 
-    if (currentOutputMode() === "json") {
-      console.error(JSON.stringify({ error: message, exitCode }, null, 2));
-    } else {
-      console.error(`${colorizeError("red", "Error:")} ${message}`);
-    }
-
+    console.error(`${colorizeError("red", "Error:")} ${message}`);
     process.exitCode = exitCode;
   }
 }
@@ -161,11 +143,7 @@ function parsePretty(value: string): PrettyFormat {
 }
 
 function shouldUsePager(options: { limit?: number }): boolean {
-  return Boolean(options.limit === undefined && process.stdout.isTTY && !currentOutputModeIsJson());
-}
-
-function currentOutputModeIsJson(): boolean {
-  return currentOutputMode() === "json";
+  return Boolean(options.limit === undefined && process.stdout.isTTY);
 }
 
 async function confirmPurge(plan: PurgePlan): Promise<void> {
@@ -214,11 +192,7 @@ async function confirmPurgeOrphans(plan: PurgeOrphansPlan): Promise<void> {
   }
 }
 
-function formatDoctor(report: DoctorReport): unknown {
-  if (currentOutputMode() === "json") {
-    return report;
-  }
-
+function formatDoctor(report: DoctorReport): string {
   const lines = [
     `${colorize("dim", "Codex home:")} ${colorize("dim", report.codexHome)}`,
     `${colorize("dim", "Supported:")} ${report.supported ? colorize("green", "yes") : colorize("red", "no")}`,
@@ -231,11 +205,7 @@ function formatDoctor(report: DoctorReport): unknown {
   return lines.join("\n");
 }
 
-function formatThreads(threads: ThreadSummary[], pretty: PrettyFormat = "oneline", usePager = false): unknown {
-  if (currentOutputMode() === "json") {
-    return { count: threads.length, threads: threads.map(toPublicThread) };
-  }
-
+function formatThreads(threads: ThreadSummary[], pretty: PrettyFormat = "oneline", usePager = false): string {
   if (threads.length === 0) {
     return "No Codex conversations found.";
   }
@@ -292,11 +262,7 @@ function pageText(text: string): string {
   return "";
 }
 
-function formatPurgeResult(result: PurgeExecutionReport): unknown {
-  if (currentOutputMode() === "json") {
-    return sanitizePurgeResult(result);
-  }
-
+function formatPurgeResult(result: PurgeExecutionReport): string {
   const lines = [
     colorize("green", "Purge executed."),
     "",
@@ -530,7 +496,7 @@ function errorColorsEnabled(): boolean {
 }
 
 function streamColorsEnabled(stream: NodeJS.WriteStream): boolean {
-  return !currentOutputModeIsJson() && !("NO_COLOR" in process.env) && Boolean(stream.isTTY);
+  return !("NO_COLOR" in process.env) && Boolean(stream.isTTY);
 }
 
 function displayTitle(title: string): string {
@@ -544,27 +510,4 @@ function displayTitle(title: string): string {
   }
 
   return `${normalized.slice(0, TITLE_MAX_LENGTH - 3)}...`;
-}
-
-function toPublicThread(thread: ThreadSummary) {
-  return {
-    id: thread.id,
-    title: displayTitle(thread.title),
-    titleTruncated: thread.title.trim().replaceAll(/\s+/g, " ").length > TITLE_MAX_LENGTH,
-    rolloutPath: thread.rolloutPath,
-    createdAtMs: thread.createdAtMs,
-    updatedAtMs: thread.updatedAtMs,
-    cwd: thread.cwd,
-    archived: thread.archived,
-  };
-}
-
-function sanitizePurgeResult(result: PurgeExecutionReport): unknown {
-  return {
-    ...result,
-    plan: {
-      ...result.plan,
-      target: toPublicThread(result.plan.target),
-    },
-  };
 }

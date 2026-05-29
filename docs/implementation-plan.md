@@ -10,8 +10,7 @@
 6. Implement `list --grep`.
 7. Implement thread resolution for purge planning.
 8. Implement purge planner.
-9. Add JSON output.
-10. Start purge safety implementation only after MVP review.
+9. Start purge safety implementation only after MVP review.
 
 ## Proposed Source Layout
 

@@ -159,7 +159,7 @@ codex-history purge-orphans
 codex-history purge-orphans --force
 ```
 
-`--force` 只跳过交互确认，不会跳过数据结构校验、active thread 保护和删除后的验证。`purge-orphans` 不支持 JSON 输出。
+`--force` 只跳过交互确认，不会跳过数据结构校验、active thread 保护和删除后的验证。
 
 空间统计是估算值。SQLite 删除记录后，数据库文件可能不会立刻缩小，直到 Codex 或其他 SQLite 维护步骤执行 vacuum。
 
@@ -167,13 +167,9 @@ codex-history purge-orphans --force
 
 ```bash
 codex-history --codex-home /path/to/.codex list
-codex-history --json list --grep "Astro"
-codex-history --json purge 019e6885 --force
 ```
 
 - `--codex-home` 默认是 `~/.codex`。
-- `--json` 输出机器可读的 JSON。`purge` 使用 JSON 输出时必须加 `--force`，因为交互确认只适合文本模式。
-- `purge-orphans` 不支持 JSON 输出。
 - 颜色只会在交互式终端中启用，并遵守 `NO_COLOR`。
 
 ## 安全机制

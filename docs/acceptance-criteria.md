@@ -23,7 +23,6 @@ The `feat/history-cli-mvp` milestone is complete when:
 - `codex-history purge <id>` requires interactive short-id confirmation before mutation
 - `codex-history purge <id> --force` executes without interactive confirmation
 - `--codex-home <path>` works for all commands
-- `--json` returns machine-readable output for supported commands
 - tests do not read or write the developer's real `~/.codex`
 - `npm run typecheck`, `npm run build`, and `npm test` pass
 

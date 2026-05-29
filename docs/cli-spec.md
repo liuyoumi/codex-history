@@ -4,8 +4,6 @@
 
 - Human-readable output is the default.
 - Destructive commands require target confirmation by default.
-- Machine-readable JSON output should be available with `--json`.
-- `purge-orphans` is human-readable only and does not support JSON output.
 - Search may be broad; purge resolution must be a unique full id or short id prefix.
 - Any command that cannot validate the Codex data model must fail closed.
 
@@ -15,7 +13,6 @@
 codex-history --help
 codex-history --version
 codex-history --codex-home <path>
-codex-history --json
 ```
 
 Defaults:
@@ -27,7 +24,6 @@ Defaults:
 
 ```bash
 codex-history doctor
-codex-history doctor --json
 ```
 
 Checks:
@@ -55,7 +51,6 @@ codex-history list --grep "keyword"
 codex-history list --pretty=oneline
 codex-history list --pretty=medium
 codex-history list --pretty=full
-codex-history list --json
 ```
 
 Default behavior:
@@ -119,8 +114,6 @@ Execution behavior:
 
 `--force` skips only interactive confirmation. It does not skip schema validation, active-thread checks, or verification.
 
-`--json purge <thread_id>` requires `--force`, because interactive confirmation is text-only.
-
 ## `purge-orphans`
 
 ```bash
@@ -139,7 +132,6 @@ Default behavior:
 
 Execution behavior:
 
-- does not support JSON output
 - refuses active orphan thread targets when detectable
 - does not recursively scan broad directories
 - does not expand deletion to parent or child branches unless those threads are independently orphaned

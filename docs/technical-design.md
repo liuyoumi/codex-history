@@ -104,8 +104,6 @@ A purge plan should include:
 - validation warnings
 - unsupported stores, if any
 
-The plan should be serializable for `--json`.
-
 ## SQLite Mutations
 
 For `state_5.sqlite`:

@@ -21,7 +21,7 @@
 - [x] Avoid broad recursive deletion.
 - [x] Use structural JSON parsing and writing.
 - [x] Stop on unexpected schema or parse failure.
-- [x] Keep a machine-readable operation report.
+- [x] Keep a structured internal operation report.
 - [x] Checkpoint SQLite WAL files after mutation.
 - [x] Delete logs-only orphan rows without treating them as full thread records.
 

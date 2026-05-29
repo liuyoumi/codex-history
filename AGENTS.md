@@ -9,12 +9,11 @@
 ## Safety
 
 - Never test destructive purge behavior against the real user `~/.codex`.
-- Use fixtures or an explicit temporary `--codex-home` for purge validation.
-- Preserve purge guards: unique id resolution, confirmation unless `--force`, permanent deletion warning, active-thread protection, and verification.
+- Preserve the purge safety model documented in `docs/requirements.md`, `docs/cli-spec.md`, and `docs/safety-checklist.md`.
 
 ## Workflow
 
-- For user-visible code changes, bug fixes, command behavior changes, or safety-sensitive edits, follow `docs/agent-workflow.md` before implementation.
+- For user-visible code changes, bug fixes, command behavior changes, or safety-sensitive edits, follow `docs/agent-workflow.md`.
 
 ## Documentation
 

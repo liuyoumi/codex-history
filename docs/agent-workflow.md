@@ -1,6 +1,6 @@
 # Agent Workflow
 
-This workflow is for Codex or other AI agents working in this repository. It is an internal implementation discipline, not a requirement for the user to review every intermediate step.
+This workflow is for Codex or other AI agents working in this repository. It expands the workflow rule in `AGENTS.md`; it is an internal implementation discipline, not a requirement for the user to review every intermediate step.
 
 ## When To Use
 
@@ -38,7 +38,8 @@ Revise the note until the implementation path is specific enough to follow. Ask 
 
 - Keep changes scoped to the reviewed plan.
 - Prefer existing project patterns over new abstractions.
-- For purge behavior, use fixtures or an explicit temporary `--codex-home`; never validate against the real user `~/.codex`.
+- For purge behavior, preserve the documented safety guarantees: unique id resolution, confirmation unless `--force`, permanent deletion warning, active-thread protection, and verification.
+- Validate purge behavior only with fixtures or an explicit temporary `--codex-home`.
 - Add or update durable tests when behavior changes.
 - Temporary scripts, notes, or exploratory fixtures may be used, but must be removed before commit.
 
@@ -47,6 +48,5 @@ Revise the note until the implementation path is specific enough to follow. Ask 
 Before committing:
 
 - Remove temporary implementation notes and temporary validation files.
-- Update `README.md`, `README.en.md`, `CHANGELOG.md`, and relevant `docs/` files when behavior changes.
-- Run the validation commands required by `AGENTS.md`.
+- Apply the documentation and validation rules from `AGENTS.md`.
 - Inspect `git status` and the final diff to ensure only durable project files remain.

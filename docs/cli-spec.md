@@ -5,6 +5,7 @@
 - Human-readable output is the default.
 - Destructive commands require target confirmation by default.
 - Machine-readable JSON output should be available with `--json`.
+- `purge-orphans` is human-readable only and does not support JSON output.
 - Search may be broad; purge resolution must be a unique full id or short id prefix.
 - Any command that cannot validate the Codex data model must fail closed.
 
@@ -119,6 +120,35 @@ Execution behavior:
 `--force` skips only interactive confirmation. It does not skip schema validation, active-thread checks, or verification.
 
 `--json purge <thread_id>` requires `--force`, because interactive confirmation is text-only.
+
+## `purge-orphans`
+
+```bash
+codex-history purge-orphans
+codex-history purge-orphans --force
+```
+
+Default behavior:
+
+- scan supported stores for orphaned local Codex data
+- include threads whose `rollout_path` points to a missing session or archived session file
+- include logs-only thread ids that exist in `logs_2.sqlite.logs` but not in `state_5.sqlite.threads`
+- print orphan counts, affected SQLite rows, files to delete, and estimated local disk space affected
+- require the user to type `purge-orphans` before deletion
+- refuse non-interactive execution unless `--force` is provided
+
+Execution behavior:
+
+- does not support JSON output
+- refuses active orphan thread targets when detectable
+- does not recursively scan broad directories
+- does not expand deletion to parent or child branches unless those threads are independently orphaned
+- removes matching supported SQLite, JSON, JSONL, and shell snapshot references
+- runs verification after mutation
+
+`--force` skips only interactive confirmation. It does not skip schema validation, active-thread checks, or verification.
+
+Space reporting is an estimate. SQLite database files may not shrink immediately after row deletion.
 
 ## Exit Codes
 

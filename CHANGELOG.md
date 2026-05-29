@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Add `purge-orphans` for guarded cleanup of missing-rollout threads and logs-only orphan records.
+- Report estimated local disk space affected by orphan cleanup.
+
 ## 0.1.3 - 2026-05-29
 
 ### Changed

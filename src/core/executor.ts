@@ -21,8 +21,16 @@ export type PurgeExecutionReport = {
   verification: VerificationReport;
 };
 
-export function executePurge(paths: ResolvedPaths, plan: PurgePlan): PurgeExecutionReport {
-  const activeThreadChecks = assertThreadIsNotActive(plan.target);
+type ExecutePurgeOptions = {
+  skipActiveThreadCheck?: boolean;
+};
+
+export function executePurge(
+  paths: ResolvedPaths,
+  plan: PurgePlan,
+  options: ExecutePurgeOptions = {},
+): PurgeExecutionReport {
+  const activeThreadChecks = options.skipActiveThreadCheck ? [] : assertThreadIsNotActive(plan.target);
   const sqlite = purgeSqlite(paths, plan.target.id);
   const json = [
     removeThreadFromSessionIndex(paths.sessionIndex, plan.target.id),

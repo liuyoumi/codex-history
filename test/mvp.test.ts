@@ -1,10 +1,11 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
 import { afterEach, describe, expect, it } from "vitest";
 import { doctorCommand } from "../src/commands/doctor.js";
 import { listCommand } from "../src/commands/list.js";
 import { planPurgeCommand, purgeCommand } from "../src/commands/purge.js";
+import { executePurgeOrphansPlanCommand, planPurgeOrphansCommand } from "../src/commands/purge-orphans.js";
 import { SafetyRefusalError } from "../src/core/errors.js";
 import { createCodexFixture } from "./helpers/fixture.js";
 
@@ -110,6 +111,97 @@ describe("mvp commands", () => {
     } finally {
       stateDb.close();
     }
+  });
+
+  it("plans orphan purge without mutating data", () => {
+    const fixture = createCodexFixture({ includeOrphans: true });
+    const plan = planPurgeOrphansCommand(fixture.paths);
+
+    expect(plan.mode).toBe("planned");
+    expect(plan.orphanThreads.map((thread) => thread.id).sort()).toEqual([
+      "thread-archived-orphan",
+      "thread-orphan",
+    ]);
+    expect(plan.logsOnlyOrphans.map((orphan) => orphan.threadId)).toEqual(["thread-logs-only"]);
+    expect(plan.impact.sqlite.find((item) => item.store === "logs_db.logs")?.rows).toBe(3);
+    expect(plan.impact.filesToDelete).toBe(1);
+    expect(plan.impact.estimatedLogPayloadBytes).toBe(7168);
+
+    const stateDb = new Database(fixture.paths.stateDb, { readonly: true });
+    try {
+      const row = stateDb.prepare("select count(*) as count from threads where id = ?").get("thread-orphan") as {
+        count: number;
+      };
+      expect(row.count).toBe(1);
+    } finally {
+      stateDb.close();
+    }
+  });
+
+  it("executes orphan purge without expanding branch deletion", () => {
+    const fixture = createCodexFixture({ includeOrphans: true });
+    const plan = planPurgeOrphansCommand(fixture.paths);
+    const result = executePurgeOrphansPlanCommand(fixture.paths, plan);
+
+    expect(result.mode).toBe("executed");
+    expect(result.verification.success).toBe(true);
+    expect(result.logsOnly.changedRows).toBe(1);
+    expect(existsSync(path.join(fixture.codexHome, "shell_snapshots", "thread-orphan.1.sh"))).toBe(false);
+    expect(readFileSync(fixture.paths.sessionIndex, "utf8")).not.toContain("thread-orphan");
+    expect(readFileSync(fixture.paths.globalState, "utf8")).not.toContain("thread-orphan");
+
+    const stateDb = new Database(fixture.paths.stateDb, { readonly: true });
+    const logsDb = new Database(fixture.paths.logsDb, { readonly: true });
+    const goalsDb = new Database(fixture.paths.goalsDb, { readonly: true });
+    try {
+      const orphanThreadRows = stateDb
+        .prepare("select count(*) as count from threads where id in (?, ?)")
+        .get("thread-orphan", "thread-archived-orphan") as { count: number };
+      const keptThreadRows = stateDb.prepare("select count(*) as count from threads where id = ?").get("thread-2") as {
+        count: number;
+      };
+      const edgeRows = stateDb
+        .prepare("select count(*) as count from thread_spawn_edges where parent_thread_id = ? or child_thread_id = ?")
+        .get("thread-orphan", "thread-orphan") as { count: number };
+      const logRows = logsDb
+        .prepare("select count(*) as count from logs where thread_id in (?, ?, ?)")
+        .get("thread-orphan", "thread-archived-orphan", "thread-logs-only") as { count: number };
+      const goalRows = goalsDb
+        .prepare("select count(*) as count from thread_goals where thread_id = ?")
+        .get("thread-orphan") as { count: number };
+
+      expect(orphanThreadRows.count).toBe(0);
+      expect(keptThreadRows.count).toBe(1);
+      expect(edgeRows.count).toBe(0);
+      expect(logRows.count).toBe(0);
+      expect(goalRows.count).toBe(0);
+    } finally {
+      stateDb.close();
+      logsDb.close();
+      goalsDb.close();
+    }
+  });
+
+  it("refuses orphan purge when an orphan target is active", () => {
+    const fixture = createCodexFixture({ includeOrphans: true });
+    process.env.CODEX_THREAD_ID = "thread-orphan";
+    const plan = planPurgeOrphansCommand(fixture.paths);
+
+    expect(() => executePurgeOrphansPlanCommand(fixture.paths, plan)).toThrow(SafetyRefusalError);
+  });
+
+  it("refuses orphan purge when a planned missing rollout reappears", () => {
+    const fixture = createCodexFixture({ includeOrphans: true });
+    const plan = planPurgeOrphansCommand(fixture.paths);
+    const target = plan.threadPlans.find((threadPlan) => threadPlan.target.id === "thread-orphan");
+
+    if (!target) {
+      throw new Error("expected orphan thread plan");
+    }
+
+    writeFileSync(target.target.rolloutPath, JSON.stringify({ type: "session_meta" }) + "\n");
+
+    expect(() => executePurgeOrphansPlanCommand(fixture.paths, plan)).toThrow(SafetyRefusalError);
   });
 
   it("refuses to purge the active thread", () => {

@@ -18,7 +18,7 @@
 
 一个用来查找并删除本地 Codex 对话历史的小型命令行工具。
 
-`codex-history` 只处理你机器上的本地 Codex 数据。它会尽量使用 Codex 对话列表里显示的短标题，支持用 `--grep` 缩小范围，并且只会在你确认目标后删除一条明确解析出来的对话。
+`codex-history` 只处理你机器上的本地 Codex 数据。它会尽量使用 Codex 对话列表里显示的短标题，支持用 `--grep` 缩小范围，并且只会在你确认目标后删除明确解析出来的对话或孤儿数据。
 
 ## 安装
 
@@ -51,6 +51,7 @@ codex-history doctor
 codex-history list
 codex-history list --grep "Astro"
 codex-history purge 019e6885
+codex-history purge-orphans
 ```
 
 `purge` 会先展示解析到的对话信息，并要求你输入标准短 id，确认后才会删除：
@@ -75,6 +76,7 @@ Type 019e6885 to confirm:
 | `codex-history list` | 列出本地对话。 |
 | `codex-history list --grep <keyword>` | 按标题、id 或 cwd 过滤对话。 |
 | `codex-history purge <id>` | 确认后删除一条解析到的本地对话。 |
+| `codex-history purge-orphans` | 确认后清理本地孤儿数据。 |
 
 ### `doctor`
 
@@ -141,6 +143,26 @@ codex-history purge 019e6885 --force
 
 `--force` 只跳过交互式短 id 确认，不会跳过数据结构校验、active thread 保护和删除后的验证。
 
+### `purge-orphans`
+
+清理本地孤儿数据：包括 `state_5.sqlite.threads.rollout_path` 指向的 session / archived session 文件已经不存在的对话，以及只残留在 `logs_2.sqlite.logs` 中、但 `threads` 表里已经没有对应 thread 的日志记录。
+
+```bash
+codex-history purge-orphans
+```
+
+该命令会先展示清理计划、受影响的 SQLite 行数、将删除的文件数量，以及估算的本地磁盘空间影响。确认后需要输入 `purge-orphans` 才会执行。
+
+脚本或非交互环境可以使用 `--force`：
+
+```bash
+codex-history purge-orphans --force
+```
+
+`--force` 只跳过交互确认，不会跳过数据结构校验、active thread 保护和删除后的验证。`purge-orphans` 不支持 JSON 输出。
+
+空间统计是估算值。SQLite 删除记录后，数据库文件可能不会立刻缩小，直到 Codex 或其他 SQLite 维护步骤执行 vacuum。
+
 ## 选项
 
 ```bash
@@ -151,6 +173,7 @@ codex-history --json purge 019e6885 --force
 
 - `--codex-home` 默认是 `~/.codex`。
 - `--json` 输出机器可读的 JSON。`purge` 使用 JSON 输出时必须加 `--force`，因为交互确认只适合文本模式。
+- `purge-orphans` 不支持 JSON 输出。
 - 颜色只会在交互式终端中启用，并遵守 `NO_COLOR`。
 
 ## 安全机制

@@ -10,7 +10,11 @@ export type Fixture = {
   paths: ReturnType<typeof resolvePaths>;
 };
 
-export function createCodexFixture(): Fixture {
+export type FixtureOptions = {
+  includeOrphans?: boolean;
+};
+
+export function createCodexFixture(options: FixtureOptions = {}): Fixture {
   const root = mkdtempSync(path.join(tmpdir(), "codex-history-test-"));
   const codexHome = path.join(root, ".codex");
   mkdirSync(codexHome, { recursive: true });
@@ -61,6 +65,10 @@ export function createCodexFixture(): Fixture {
   createStateDb(path.join(codexHome, "state_5.sqlite"), firstRollout, secondRollout);
   createLogsDb(path.join(codexHome, "logs_2.sqlite"));
   createGoalsDb(path.join(codexHome, "goals_1.sqlite"));
+
+  if (options.includeOrphans) {
+    addOrphanData(codexHome);
+  }
 
   return {
     root,
@@ -172,6 +180,115 @@ function createStateDb(filePath: string, firstRollout: string, secondRollout: st
     db.prepare("insert into agent_job_items values (?, ?, ?, ?, ?, ?)").run("job-1", "item-1", 0, "{}", "done", "thread-1");
   } finally {
     db.close();
+  }
+}
+
+function addOrphanData(codexHome: string): void {
+  const missingRollout = path.join(
+    codexHome,
+    "sessions",
+    "2026",
+    "05",
+    "27",
+    "rollout-2026-05-27T12-30-00-thread-orphan.jsonl",
+  );
+  const missingArchivedRollout = path.join(
+    codexHome,
+    "archived_sessions",
+    "2026",
+    "05",
+    "27",
+    "rollout-2026-05-27T09-00-00-thread-archived-orphan.jsonl",
+  );
+
+  writeFileSync(
+    path.join(codexHome, "session_index.jsonl"),
+    [
+      JSON.stringify({ id: "thread-1", thread_name: "Delete Me", updated_at: "2026-05-27T10:00:00Z" }),
+      JSON.stringify({ id: "thread-2", thread_name: "Keep Me", updated_at: "2026-05-27T11:00:00Z" }),
+      JSON.stringify({ id: "thread-3", thread_name: "Delete Me", updated_at: "2026-05-27T12:00:00Z" }),
+      JSON.stringify({ id: "thread-orphan", thread_name: "Missing Rollout", updated_at: "2026-05-27T12:30:00Z" }),
+      JSON.stringify({
+        id: "thread-archived-orphan",
+        thread_name: "Archived Missing Rollout",
+        updated_at: "2026-05-27T09:00:00Z",
+      }),
+    ].join("\n") + "\n",
+  );
+
+  writeFileSync(
+    path.join(codexHome, ".codex-global-state.json"),
+    JSON.stringify({
+      "electron-persisted-atom-state": {
+        "prompt-history": {
+          "thread-1": ["delete this"],
+          "thread-orphan": ["missing rollout"],
+          "thread-archived-orphan": ["archived missing rollout"],
+        },
+      },
+      "projectless-thread-ids": ["thread-1", "thread-2", "thread-orphan", "thread-archived-orphan"],
+    }),
+  );
+  writeFileSync(path.join(codexHome, "shell_snapshots", "thread-orphan.1.sh"), "pwd\n");
+
+  const stateDb = new Database(path.join(codexHome, "state_5.sqlite"));
+  try {
+    const insert = stateDb.prepare(`
+      insert into threads (id, rollout_path, created_at, updated_at, cwd, title, first_user_message, preview, updated_at_ms, created_at_ms, archived)
+      values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    insert.run(
+      "thread-orphan",
+      missingRollout,
+      1779866000,
+      1779867000,
+      "/tmp/project-orphan",
+      "Missing Rollout",
+      "missing rollout",
+      "missing rollout preview",
+      1779867000000,
+      1779866000000,
+      0,
+    );
+    insert.run(
+      "thread-archived-orphan",
+      missingArchivedRollout,
+      1779858000,
+      1779859000,
+      "/tmp/project-archived-orphan",
+      "Archived Missing Rollout",
+      "archived missing rollout",
+      "archived missing rollout preview",
+      1779859000000,
+      1779858000000,
+      1,
+    );
+    stateDb.prepare("insert into thread_dynamic_tools values (?, ?, ?, ?, ?)").run("thread-orphan", 0, "tool", "desc", "{}");
+    stateDb.prepare("insert into stage1_outputs values (?, ?, ?, ?, ?)").run("thread-orphan", 1, "memory", "summary", 1);
+    stateDb.prepare("insert into thread_spawn_edges values (?, ?, ?)").run("thread-orphan", "thread-2", "done");
+  } finally {
+    stateDb.close();
+  }
+
+  const logsDb = new Database(path.join(codexHome, "logs_2.sqlite"));
+  try {
+    const insert = logsDb.prepare(
+      "insert into logs (ts, ts_nanos, level, target, thread_id, estimated_bytes) values (?, ?, ?, ?, ?, ?)",
+    );
+    insert.run(2, 1, "INFO", "test", "thread-orphan", 4096);
+    insert.run(3, 1, "INFO", "test", "thread-archived-orphan", 1024);
+    insert.run(4, 1, "INFO", "test", "thread-logs-only", 2048);
+  } finally {
+    logsDb.close();
+  }
+
+  const goalsDb = new Database(path.join(codexHome, "goals_1.sqlite"));
+  try {
+    goalsDb
+      .prepare("insert into thread_goals values (?, ?, ?, ?, ?, ?)")
+      .run("thread-orphan", "goal-orphan", "objective", "active", 1, 1);
+  } finally {
+    goalsDb.close();
   }
 }
 

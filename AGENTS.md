@@ -13,7 +13,7 @@
 
 ## Workflow
 
-- For user-visible code changes, bug fixes, command behavior changes, or safety-sensitive edits, follow `docs/agent-workflow.md`.
+- For user-visible code changes, bug fixes, command behavior changes, safety-sensitive edits, or release preparation, follow `docs/agent-workflow.md`.
 
 ## Documentation
 

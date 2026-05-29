@@ -42,6 +42,7 @@ Use a lightweight topic-branch workflow for non-trivial work.
 - Keep `main` as the stable integration branch.
 - Small documentation wording edits, badge updates, cover image refreshes, and formatting-only changes may be committed directly when the work is low risk.
 - Prefer clear branch names such as `feat/<topic>`, `fix/<topic>`, `docs/<topic>`, or `release/<version>`.
+- For GitHub issue work, include the issue number in the branch name when practical, and link the pull request back to the issue with `Refs #<number>` or `Closes #<number>`.
 - Before merging back to `main`, run the required validation and inspect the final diff.
 
 ## Implementation

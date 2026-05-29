@@ -4,7 +4,7 @@
   <img alt="npm" src="https://img.shields.io/npm/v/@liuyoumi/codex-history?style=flat-square&color=cb9b27" />
   <img alt="platform" src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-2ea043?style=flat-square" />
   <img alt="local only" src="https://img.shields.io/badge/local%20data-only-6e7681?style=flat-square" />
-  <img alt="backup" src="https://img.shields.io/badge/backup-before%20purge-0969da?style=flat-square" />
+  <img alt="confirm" src="https://img.shields.io/badge/confirm-before%20purge-0969da?style=flat-square" />
   <img alt="license" src="https://img.shields.io/npm/l/@liuyoumi/codex-history?style=flat-square" />
 </p>
 
@@ -34,7 +34,7 @@ npx @liuyoumi/codex-history doctor
 
 ## Supported Platforms
 
-`codex-history` has been checked on macOS, Windows, and Linux for install, `doctor`, `list` / `--grep`, and guarded `purge` workflows with confirmation and backups.
+`codex-history` has been checked on macOS, Windows, and Linux for install, `doctor`, `list` / `--grep`, and guarded `purge` workflows with confirmation.
 
 | Platform | Status |
 | --- | --- |
@@ -63,7 +63,7 @@ id: 019e6885-b5ae-7ae0-a50d-ce5f75b0ac08
 cwd: /Users/me/Projects/example
 updated: 2026-05-28T03:16:01.959Z
 
-A backup will be created before deletion.
+This cannot be undone.
 Type 019e6885 to confirm:
 ```
 
@@ -139,7 +139,7 @@ For scripts or non-interactive shells, use `--force`:
 codex-history purge 019e6885 --force
 ```
 
-`--force` skips only the interactive short-id confirmation. It still keeps schema validation, mandatory backup, active-thread protection, and post-purge verification.
+`--force` skips only the interactive short-id confirmation. It still keeps schema validation, active-thread protection, and post-purge verification.
 
 ## Options
 
@@ -160,7 +160,6 @@ Before deleting, `codex-history`:
 - validates the supported Codex data model
 - resolves the target to exactly one conversation
 - refuses the currently active thread when detectable
-- creates a mandatory backup under `~/.codex-history/backups`
 - removes known references from supported local Codex stores
 - verifies supported stores after mutation
 
@@ -174,13 +173,9 @@ If Codex Desktop is already showing the conversation you purge, quit or restart 
 
 No. It only modifies supported local files on your machine.
 
-### Where are backups stored?
-
-Backups are written under `~/.codex-history/backups`.
-
 ### Can I recover a purged conversation?
 
-The tool creates a backup before deletion, but v0.1 does not include an automatic restore command. Treat `purge` as destructive.
+Not with this tool. Treat `purge` as destructive.
 
 ### Do I need to restart Codex after purging?
 

@@ -77,7 +77,7 @@ describe("mvp commands", () => {
     expect(plan.target.id).toBe("thread-1");
   });
 
-  it("executes purge with backup and verification in a fixture", () => {
+  it("executes purge with verification in a fixture", () => {
     const fixture = createCodexFixture();
     const result = purgeCommand(fixture.paths, "thread-1");
 
@@ -86,8 +86,6 @@ describe("mvp commands", () => {
       throw new Error("expected executed purge report");
     }
 
-    expect(result.backup.entries.length).toBeGreaterThan(0);
-    expect(existsSync(path.join(result.backup.backupDir, "manifest.json"))).toBe(true);
     expect(result.verification.success).toBe(true);
     expect(existsSync(result.plan.target.rolloutPath)).toBe(false);
     expect(existsSync(path.join(fixture.codexHome, "shell_snapshots", "thread-1.1.sh"))).toBe(false);

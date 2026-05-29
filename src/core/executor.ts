@@ -1,9 +1,7 @@
 import { existsSync } from "node:fs";
 import type { ResolvedPaths } from "./paths.js";
 import type { PurgePlan } from "./planner.js";
-import type { BackupManifest } from "../safety/backup.js";
 import { assertThreadIsNotActive, type ActiveThreadCheck } from "../safety/active-thread.js";
-import { createBackup } from "../safety/backup.js";
 import { verifyPurge, type VerificationReport } from "../safety/verify.js";
 import { deleteFileIfExists, type FileDeletionResult } from "../stores/files.js";
 import {
@@ -17,7 +15,6 @@ export type PurgeExecutionReport = {
   mode: "executed";
   plan: PurgePlan;
   activeThreadChecks: ActiveThreadCheck[];
-  backup: BackupManifest;
   sqlite: Array<{ store: string; changedRows: number }>;
   json: JsonMutationResult[];
   files: FileDeletionResult[];
@@ -26,7 +23,6 @@ export type PurgeExecutionReport = {
 
 export function executePurge(paths: ResolvedPaths, plan: PurgePlan): PurgeExecutionReport {
   const activeThreadChecks = assertThreadIsNotActive(plan.target);
-  const backup = createBackup(paths, plan);
   const sqlite = purgeSqlite(paths, plan.target.id);
   const json = [
     removeThreadFromSessionIndex(paths.sessionIndex, plan.target.id),
@@ -45,7 +41,6 @@ export function executePurge(paths: ResolvedPaths, plan: PurgePlan): PurgeExecut
     mode: "executed",
     plan,
     activeThreadChecks,
-    backup,
     sqlite,
     json,
     files,
@@ -142,4 +137,3 @@ function purgeFiles(plan: PurgePlan): FileDeletionResult[] {
 
   return results;
 }
-

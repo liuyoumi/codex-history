@@ -32,7 +32,7 @@ The `feat/history-cli-mvp` milestone is complete when:
 The `feat/purge-safety` milestone is complete when:
 
 - [x] `purge` requires a unique target
-- [x] backup is mandatory and includes a manifest
+- [x] purge is permanent and does not create tool-owned backups
 - [x] schema validation runs before mutation
 - [x] active-thread protection runs before mutation
 - [x] SQLite mutations use transactions

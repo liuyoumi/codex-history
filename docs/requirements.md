@@ -40,7 +40,7 @@ Deletion must internally resolve to exactly one Codex thread id before modifying
 3. User runs `purge <id>`.
 4. Tool displays the resolved target title, full id, updated time, and cwd.
 5. User types the standard short id to confirm deletion.
-6. Tool creates a backup, executes purge, and verifies that the target thread id is no longer present in supported local Codex data stores.
+6. Tool executes purge and verifies that the target thread id is no longer present in supported local Codex data stores.
 
 ## Non-Goals
 
@@ -73,19 +73,13 @@ The tool must make destructive behavior intentionally boring and hard to trigger
 - `--force` skips only interactive confirmation.
 - successful purge must print a verification summary.
 
-## Backup Requirements
+## Recovery Requirements
 
 Default behavior:
 
-- create a timestamped backup before destructive purge
-- store backups under `~/.codex-history/backups`
-- include changed SQLite databases, JSON/JSONL state files, rollout file, and shell snapshots
-- print the backup path in the final report
-
-Options:
-
-- `--no-backup` may be supported later, but should not be included in `0.1`
-- backup restore can be documented manually in `0.1`; a `restore` command is not required for first release
+- do not create tool-owned backups before destructive purge
+- describe purge as permanent local deletion
+- rely on explicit target confirmation, active-thread protection, and post-purge verification for safety
 
 ## Failure Policy
 
@@ -97,7 +91,6 @@ Fail without modifying data when:
 - required files cannot be parsed
 - selected thread cannot be resolved uniquely
 - selected thread appears active
-- backup creation fails
 - purge plan cannot account for a supported store
 
 If purge starts and a later step fails, the tool must report partial work and verification failures clearly.

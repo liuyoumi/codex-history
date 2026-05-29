@@ -36,7 +36,6 @@ Checks:
 - required tables and columns exist
 - supported JSON files parse
 - session index parses as JSONL
-- backup directory can be created
 
 Exit codes:
 
@@ -114,11 +113,10 @@ Default behavior:
 Execution behavior:
 
 - requires a unique thread id or unique short id prefix
-- requires backup creation
 - refuses active threads
 - runs verification after mutation
 
-`--force` skips only interactive confirmation. It does not skip schema validation, backup creation, active-thread checks, or verification.
+`--force` skips only interactive confirmation. It does not skip schema validation, active-thread checks, or verification.
 
 `--json purge <thread_id>` requires `--force`, because interactive confirmation is text-only.
 

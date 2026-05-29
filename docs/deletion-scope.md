@@ -23,7 +23,6 @@
 - unrelated conversations
 - unrelated shell snapshots
 - unrelated logs
-- tool-generated backups
 
 ## Explicitly Not Guaranteed
 

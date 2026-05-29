@@ -8,13 +8,13 @@ Questions:
 
 - Are `list`, `doctor`, and `purge` enough for `0.1`?
 - Should `archive` be kept out of `0.1`?
-- Should backup be mandatory for `0.1`?
+- Should purge create a tool-owned backup?
 
 Decisions:
 
 - Include `doctor` in `0.1`.
 - Keep `archive` out of `0.1`.
-- Make backup mandatory in `0.1`.
+- Do not create tool-owned backups; this tool is for removing local history, not preserving another copy.
 - Keep destructive purge id-only.
 - Use `list --grep` to resolve human-readable text to an id before purge.
 - Support npm global install and `npx` usage.
@@ -52,7 +52,6 @@ Decisions:
 
 - Treat active-thread detection conservatively.
 - Keep destructive purge id-only in `0.1`; use `list --grep` to find the id first.
-- Refuse purge if backup cannot be created.
 - Refuse purge if schema validation fails.
 - Refuse purge if verification cannot run.
 

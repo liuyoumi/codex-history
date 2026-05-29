@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.2 - 2026-05-28
+## 0.1.2 - 2026-05-29
 
 ### Documentation
 
@@ -8,6 +8,10 @@
 - Add an English README translation.
 - Refresh the README cover image to focus on a single guarded `purge` command flow.
 - Add README badges and clearer macOS, Windows, and Linux support notes.
+
+### Changed
+
+- Remove purge backup creation and document `purge` as a permanent local deletion flow.
 
 ## 0.1.1 - 2026-05-28
 
@@ -28,7 +32,7 @@ Initial release candidate.
 - `purge <id>` execution by full id or unique short id prefix.
 - Interactive purge confirmation by typing the standard short id.
 - `purge <id> --force` for non-interactive execution.
-- Guarded purge execution with mandatory backups.
+- Guarded purge execution with explicit confirmation.
 - SQLite cleanup for supported Codex stores.
 - JSON and JSONL state cleanup for supported Codex files.
 - Rollout jsonl and shell snapshot deletion.

@@ -18,22 +18,16 @@ Secondary stores:
 - `~/.codex/goals_1.sqlite`
 - `~/.codex/shell_snapshots/{threadId}.*.sh`
 
-Tool-owned stores:
-
-- `~/.codex-history/backups`
-- `~/.codex-history/reports`
-
-The tool must never store its own metadata inside `~/.codex`.
+The tool must not write tool-owned recovery copies of purged conversations.
 
 ## Architecture
 
 Suggested modules:
 
-- `paths`: resolve Codex home, tool home, and platform-specific paths
+- `paths`: resolve Codex home and platform-specific paths
 - `schema`: validate supported Codex data model
 - `threads`: list, filter, and resolve thread candidates
 - `planner`: build purge plans before mutation
-- `backup`: copy all files required for rollback or manual inspection
 - `sqlite`: execute database mutations with transactions and checkpoints
 - `json-state`: mutate structured JSON and JSONL state files
 - `files`: remove rollout files and shell snapshots
@@ -67,11 +61,10 @@ Purge execution should use these steps:
 1. Resolve input to exactly one thread.
 2. Reject if the thread appears active or loaded.
 3. Build a purge plan.
-4. Create a backup unless disabled by explicit option.
-5. Execute database and file changes.
-6. Checkpoint SQLite WAL files.
-7. Optionally vacuum SQLite databases.
-8. Verify no supported store still references the thread id.
+4. Execute database and file changes.
+5. Checkpoint SQLite WAL files.
+6. Optionally vacuum SQLite databases.
+7. Verify no supported store still references the thread id.
 
 Interactive `purge` shows the resolved target after step 3 and requires the user to type the standard short id before continuing. `--force` skips only that interactive confirmation.
 
@@ -83,7 +76,6 @@ A purge plan should include:
 - SQLite databases and row counts to mutate
 - JSON/JSONL files to rewrite
 - files to delete
-- backup destination
 - validation warnings
 - unsupported stores, if any
 
@@ -151,31 +143,17 @@ Remove:
 
 The tool should not recursively delete broad directories.
 
-## Backup Format
+## Recovery Model
 
-Backup directory:
+`purge` is a permanent local deletion flow. The tool does not create backups or provide restore commands in `0.1`.
 
-```text
-~/.codex-history/backups/YYYYMMDD-HHMMSS-<threadId>/
-```
+Safety comes from:
 
-Contents:
-
-- `manifest.json`
-- `state_5.sqlite`
-- `state_5.sqlite-wal`, if present
-- `state_5.sqlite-shm`, if present
-- `logs_2.sqlite`, if present
-- `logs_2.sqlite-wal`, if present
-- `logs_2.sqlite-shm`, if present
-- `goals_1.sqlite`, if present
-- `session_index.jsonl`, if present
-- `.codex-global-state.json`, if present
-- `.codex-global-state.json.bak`, if present
-- rollout jsonl file, if present
-- shell snapshots, if present
-
-The manifest should include original absolute paths, copied paths, file sizes, and timestamps.
+- resolving exactly one target before mutation
+- showing the resolved target before deletion
+- requiring short-id confirmation unless `--force` is used
+- refusing active threads when detectable
+- verifying supported stores after mutation
 
 ## Active Thread Protection
 
@@ -224,7 +202,6 @@ Required test groups:
 
 - thread resolution
 - purge planning
-- backup manifest generation
 - SQLite mutation against temporary fixtures
 - JSON/JSONL mutation
 - verification failure reporting

@@ -1,5 +1,4 @@
-import { mkdirSync, readFileSync } from "node:fs";
-import { dirname } from "node:path";
+import { readFileSync } from "node:fs";
 import type { ResolvedPaths } from "./paths.js";
 import { fileStatus } from "./paths.js";
 import { openReadonlyDatabase, sqliteFileExists, tableColumns, tableExists } from "../stores/sqlite.js";
@@ -45,7 +44,6 @@ export function runDoctor(paths: ResolvedPaths): DoctorReport {
   checks.push(checkJsonFile(paths.globalState, "global_state"));
   checks.push(checkJsonFile(paths.globalStateBackup, "global_state_backup"));
   checks.push(checkJsonlFile(paths.sessionIndex, "session_index"));
-  checks.push(checkBackupHome(paths.backupHome));
 
   return {
     supported: !checks.some((check) => check.status === "error"),
@@ -54,14 +52,9 @@ export function runDoctor(paths: ResolvedPaths): DoctorReport {
   };
 }
 
-export function validateSupportedDataModel(
-  paths: ResolvedPaths,
-  options: { requireBackupHome?: boolean } = {},
-): void {
+export function validateSupportedDataModel(paths: ResolvedPaths): void {
   const report = runDoctor(paths);
-  const errors = report.checks.filter(
-    (check) => check.status === "error" && (options.requireBackupHome || check.name !== "backup_home"),
-  );
+  const errors = report.checks.filter((check) => check.status === "error");
 
   if (errors.length > 0) {
     const details = errors.map((check) => `${check.name}: ${check.detail}`).join("; ");
@@ -193,24 +186,6 @@ function checkJsonlFile(filePath: string, name: string): DoctorCheck {
   } catch (error) {
     return {
       name,
-      status: "error",
-      detail: error instanceof Error ? error.message : String(error),
-    };
-  }
-}
-
-function checkBackupHome(backupHome: string): DoctorCheck {
-  try {
-    mkdirSync(dirname(backupHome), { recursive: true });
-    mkdirSync(backupHome, { recursive: true });
-    return {
-      name: "backup_home",
-      status: "ok",
-      detail: backupHome,
-    };
-  } catch (error) {
-    return {
-      name: "backup_home",
       status: "error",
       detail: error instanceof Error ? error.message : String(error),
     };

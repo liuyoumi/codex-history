@@ -5,7 +5,7 @@
 - `chore/project-foundation`: initial project scaffold
 - `docs/finalize-spec`: reviewed product and technical specification
 - `feat/history-cli-mvp`: list, doctor, and purge planning
-- `feat/purge-safety`: destructive purge with backups and verification
+- `feat/purge-safety`: destructive purge with confirmation and verification
 - `release/v0.1.0`: npm packaging and release notes
 
 ## Milestone 1: Specification
@@ -47,7 +47,6 @@ Exit criteria:
 
 Required features:
 
-- backup creation
 - SQLite transactional mutations
 - JSON and JSONL structural mutations
 - rollout and shell snapshot deletion

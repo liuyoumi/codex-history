@@ -4,7 +4,7 @@
   <img alt="npm" src="https://img.shields.io/npm/v/@liuyoumi/codex-history?style=flat-square&color=cb9b27" />
   <img alt="platform" src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-2ea043?style=flat-square" />
   <img alt="local only" src="https://img.shields.io/badge/local%20data-only-6e7681?style=flat-square" />
-  <img alt="backup" src="https://img.shields.io/badge/backup-before%20purge-0969da?style=flat-square" />
+  <img alt="confirm" src="https://img.shields.io/badge/confirm-before%20purge-0969da?style=flat-square" />
   <img alt="license" src="https://img.shields.io/npm/l/@liuyoumi/codex-history?style=flat-square" />
 </p>
 
@@ -34,7 +34,7 @@ npx @liuyoumi/codex-history doctor
 
 ## 支持平台
 
-`codex-history` 已在 macOS、Windows、Linux 上完成基础流程验证，包括安装、`doctor`、`list` / `--grep`，以及带确认和备份保护的 `purge`。
+`codex-history` 已在 macOS、Windows、Linux 上完成基础流程验证，包括安装、`doctor`、`list` / `--grep`，以及带确认保护的 `purge`。
 
 | 平台 | 状态 |
 | --- | --- |
@@ -63,7 +63,7 @@ id: 019e6885-b5ae-7ae0-a50d-ce5f75b0ac08
 cwd: /Users/me/Projects/example
 updated: 2026-05-28T03:16:01.959Z
 
-A backup will be created before deletion.
+This cannot be undone.
 Type 019e6885 to confirm:
 ```
 
@@ -139,7 +139,7 @@ codex-history purge 019e6885
 codex-history purge 019e6885 --force
 ```
 
-`--force` 只跳过交互式短 id 确认，不会跳过数据结构校验、强制备份、active thread 保护和删除后的验证。
+`--force` 只跳过交互式短 id 确认，不会跳过数据结构校验、active thread 保护和删除后的验证。
 
 ## 选项
 
@@ -160,7 +160,6 @@ codex-history --json purge 019e6885 --force
 - 校验当前 Codex 本地数据结构是否受支持
 - 将目标解析到唯一一条对话
 - 在可检测时拒绝删除当前 active thread
-- 在 `~/.codex-history/backups` 下创建强制备份
 - 从受支持的本地 Codex 数据中移除已知引用
 - 删除后扫描受支持的数据存储，确认目标引用已经移除
 
@@ -174,13 +173,9 @@ codex-history --json purge 019e6885 --force
 
 不会。它只修改你机器上受支持的本地文件。
 
-### 备份在哪里？
-
-备份会写入 `~/.codex-history/backups`。
-
 ### 删除后还能恢复吗？
 
-工具会在删除前创建备份，但 v0.1 还没有自动恢复命令。请把 `purge` 当作破坏性操作对待。
+不能通过这个工具恢复。请把 `purge` 当作破坏性操作对待。
 
 ### 删除后需要重启 Codex 吗？
 

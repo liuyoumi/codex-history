@@ -34,7 +34,6 @@ src/
     files.ts
   safety/
     active-thread.ts
-    backup.ts
     verify.ts
 test/
   fixtures/
@@ -57,7 +56,6 @@ test: add fixture coverage for mvp commands
 For `feat/purge-safety`:
 
 ```text
-feat: add backup manifest creation
 feat: add sqlite purge mutations
 feat: add json state purge mutations
 feat: add purge verification

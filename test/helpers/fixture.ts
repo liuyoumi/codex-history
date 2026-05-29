@@ -7,14 +7,12 @@ import { resolvePaths } from "../../src/core/paths.js";
 export type Fixture = {
   root: string;
   codexHome: string;
-  toolHome: string;
   paths: ReturnType<typeof resolvePaths>;
 };
 
 export function createCodexFixture(): Fixture {
   const root = mkdtempSync(path.join(tmpdir(), "codex-history-test-"));
   const codexHome = path.join(root, ".codex");
-  const toolHome = path.join(root, ".codex-history");
   mkdirSync(codexHome, { recursive: true });
   mkdirSync(path.join(codexHome, "sessions", "2026", "05", "27"), { recursive: true });
   mkdirSync(path.join(codexHome, "shell_snapshots"), { recursive: true });
@@ -67,8 +65,7 @@ export function createCodexFixture(): Fixture {
   return {
     root,
     codexHome,
-    toolHome,
-    paths: resolvePaths(codexHome, toolHome),
+    paths: resolvePaths(codexHome),
   };
 }
 

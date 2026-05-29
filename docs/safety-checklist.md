@@ -10,8 +10,7 @@
 - [x] Validate SQLite schema.
 - [x] Validate JSON file shapes.
 - [x] Build complete purge plan before changing anything.
-- [x] Create backup.
-- [x] Refuse purge when backup creation fails.
+- [x] Treat purge as permanent local deletion.
 
 ## During Purge
 

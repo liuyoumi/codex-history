@@ -10,7 +10,7 @@ export function planPurgeCommand(paths: ResolvedPaths, threadId: string): PurgeP
 }
 
 export function executePurgePlanCommand(paths: ResolvedPaths, plan: PurgePlan) {
-  validateSupportedDataModel(paths, { requireBackupHome: true });
+  validateSupportedDataModel(paths);
   return executePurge(paths, plan);
 }
 

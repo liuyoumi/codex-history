@@ -249,7 +249,6 @@ function formatPurgeResult(result: PurgeExecutionReport): unknown {
     "",
     `Target: ${displayTitle(result.plan.target.title)}`,
     `Thread id: ${result.plan.target.id}`,
-    `Backup: ${colorize("dim", result.backup.backupDir)}`,
     "",
     "SQLite changes:",
     ...result.sqlite.map((change) => `- ${change.store}: ${change.changedRows} row(s)`),
@@ -286,7 +285,7 @@ function formatPurgeConfirmation(plan: PurgePlan): string {
     `cwd: ${colorize("dim", plan.target.cwd)}`,
     `updated: ${formatDate(plan.target.updatedAtMs)}`,
     "",
-    colorize("dim", "A backup will be created before deletion."),
+    colorize("dim", "This cannot be undone."),
     "",
   ].join("\n");
 }

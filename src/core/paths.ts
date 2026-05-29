@@ -4,8 +4,6 @@ import path from "node:path";
 
 export type ResolvedPaths = {
   codexHome: string;
-  toolHome: string;
-  backupHome: string;
   stateDb: string;
   logsDb: string;
   goalsDb: string;
@@ -27,14 +25,11 @@ export function expandHome(input: string): string {
   return input;
 }
 
-export function resolvePaths(codexHomeInput?: string, toolHomeInput?: string): ResolvedPaths {
+export function resolvePaths(codexHomeInput?: string): ResolvedPaths {
   const codexHome = path.resolve(expandHome(codexHomeInput ?? "~/.codex"));
-  const toolHome = path.resolve(expandHome(toolHomeInput ?? process.env.CODEX_HISTORY_HOME ?? "~/.codex-history"));
 
   return {
     codexHome,
-    toolHome,
-    backupHome: path.join(toolHome, "backups"),
     stateDb: path.join(codexHome, "state_5.sqlite"),
     logsDb: path.join(codexHome, "logs_2.sqlite"),
     goalsDb: path.join(codexHome, "goals_1.sqlite"),

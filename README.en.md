@@ -52,6 +52,8 @@ codex-history list
 codex-history list --grep "Astro"
 codex-history purge 019e6885
 codex-history purge 019e6885 019e6874
+codex-history purge --cwd /Users/me/Projects/example
+codex-history purge --grep "Astro"
 codex-history purge-orphans
 ```
 
@@ -77,6 +79,8 @@ Type 019e6885 to confirm:
 | `codex-history list` | List local conversations. |
 | `codex-history list --grep <keyword>` | Filter conversations by title, id, or cwd. |
 | `codex-history purge <id...>` | Remove one or more resolved local conversations after confirmation. |
+| `codex-history purge --cwd <path>` | Remove local conversations matching a working directory after confirmation. |
+| `codex-history purge --grep <keyword>` | Remove local conversations matching title, id, or cwd after confirmation. |
 | `codex-history purge-orphans` | Remove orphaned local data after confirmation. |
 
 ### `doctor`
@@ -139,11 +143,23 @@ codex-history purge 019e6885 019e6874
 
 When multiple targets are provided, the tool resolves all targets and prints a batch plan before deletion. If any id is missing, ambiguous, or active, the whole batch is refused before mutation. Interactive batch purge requires typing `purge-selected`.
 
+You can also select local conversations with filters:
+
+```bash
+codex-history purge --cwd /Users/me/Projects/example
+codex-history purge --grep "Astro"
+codex-history purge --archived
+codex-history purge --cwd /Users/me/Projects/example --grep "Astro"
+```
+
+`--cwd`, `--grep`, and `--archived` can be combined. Combined filters delete only conversations that match every provided condition. By default, filter mode matches non-archived conversations only; use `--archived` to target archived conversations. Filtered purge prints a batch plan and requires typing `purge-selected`. Filters cannot be combined with explicit ids.
+
 For scripts or non-interactive shells, use `--force`:
 
 ```bash
 codex-history purge 019e6885 --force
 codex-history purge 019e6885 019e6874 --force
+codex-history purge --cwd /Users/me/Projects/example --force
 ```
 
 `--force` skips only interactive confirmation. It still keeps schema validation, active-thread protection, and post-purge verification.

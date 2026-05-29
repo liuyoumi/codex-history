@@ -97,6 +97,10 @@ Prompt bodies are not searched because this tool is meant to match Codex history
 ```bash
 codex-history purge <thread_id>
 codex-history purge <thread_id> <thread_id>
+codex-history purge --cwd /path/to/project
+codex-history purge --grep "keyword"
+codex-history purge --archived
+codex-history purge --cwd /path/to/project --grep "keyword"
 codex-history purge <thread_id> --force
 ```
 
@@ -106,11 +110,17 @@ Default behavior:
 - print the target short id, title, full id, updated time, and cwd
 - require the user to type the standard short id before single-target deletion
 - require the user to type `purge-selected` before multi-target deletion
+- allow filter mode with `--cwd`, `--grep`, and `--archived`
+- combine purge filters as an intersection when more than one is provided
+- reject commands that combine explicit ids with purge filters
+- reject commands that provide neither ids nor purge filters
+- report no-op success when filters match no conversations
 - refuse non-interactive execution unless `--force` is provided
 
 Execution behavior:
 
 - requires every provided target to resolve uniquely
+- requires filtered targets to be listed from the supported `threads` store before mutation
 - deduplicates repeated inputs that resolve to the same thread
 - refuses the whole batch if any target appears active
 - runs verification after mutation

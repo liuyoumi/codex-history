@@ -26,6 +26,9 @@ codex-history list
 codex-history list --grep "keyword"
 codex-history purge <thread_id>
 codex-history purge <thread_id> <thread_id>
+codex-history purge --cwd /path/to/project
+codex-history purge --grep "keyword"
+codex-history purge --archived
 codex-history purge <thread_id> --force
 codex-history purge-orphans
 codex-history purge-orphans --force
@@ -35,6 +38,8 @@ codex-history doctor
 Single-thread deletion must internally resolve to exactly one Codex thread id before modifying local data.
 
 Multi-thread deletion must resolve every provided id or short id prefix before modifying local data. If any target is missing, ambiguous, or active, the whole batch must fail before mutation.
+
+Filtered deletion must use explicit purge filters such as `--cwd`, `--grep`, and `--archived`. Filters combine as an intersection, cannot be combined with explicit ids, and must build a full batch plan before modifying local data.
 
 Orphan cleanup must build a complete cleanup plan before modifying local data. It should target threads whose rollout files are missing and logs-only thread ids that no longer exist in `state_5.sqlite.threads`.
 
@@ -57,6 +62,14 @@ For explicit multi-target purge:
 4. User types `purge-selected` to confirm deletion.
 5. Tool executes purge for each unique target and verifies supported local Codex data stores.
 
+For filtered purge:
+
+1. User runs `purge --cwd <path>`, `purge --grep <keyword>`, `purge --archived`, or a supported combination.
+2. Tool lists matching regular conversations from supported local stores.
+3. Tool displays the filter selection, unique target count, target examples, and affected row counts.
+4. User types `purge-selected` to confirm deletion.
+5. Tool executes purge for each selected target and verifies supported local Codex data stores.
+
 For orphan cleanup:
 
 1. User runs `purge-orphans`.
@@ -71,6 +84,7 @@ For orphan cleanup:
 - Do not purge an active thread.
 - Do not implement destructive behavior before the requirements and technical design are reviewed and accepted.
 - Do not support fuzzy-match destructive deletion in `0.1`.
+- Do not allow destructive filter mode without at least one explicit purge filter.
 - Do not mutate global Codex files when schema validation fails.
 - Do not expand orphan cleanup across parent or child branch relationships unless that related thread is independently orphaned.
 
@@ -81,6 +95,7 @@ Version `0.1` should support:
 - list local threads from `~/.codex/state_5.sqlite`
 - filter by displayed title, id, and cwd with `list --grep`
 - purge by one or more unique thread ids
+- purge regular conversations selected by `--cwd`, `--grep`, and `--archived` filters
 - purge orphaned local data whose rollout files are missing
 - purge logs-only orphan records without treating them as full threads
 - remove related local records from supported Codex stores
@@ -95,6 +110,7 @@ The tool must make destructive behavior intentionally boring and hard to trigger
 - `purge` must show the resolved thread id before deletion.
 - interactive purge requires typing the standard short id before deletion.
 - interactive multi-target purge requires typing `purge-selected` before deletion.
+- interactive filtered purge requires typing `purge-selected` before deletion.
 - non-interactive purge requires `--force`.
 - `--force` skips only interactive confirmation.
 - successful purge must print a verification summary.
@@ -121,6 +137,7 @@ Fail without modifying data when:
 - selected thread cannot be resolved uniquely
 - selected thread appears active
 - any selected batch target cannot be resolved uniquely or appears active
+- filtered purge has no filter, mixes filters with ids, or contains an active selected target
 - purge plan cannot account for a supported store
 - orphan cleanup cannot build a complete supported-store plan
 

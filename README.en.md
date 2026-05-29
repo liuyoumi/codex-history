@@ -18,7 +18,7 @@
 
 A small CLI for finding and removing local Codex conversation history.
 
-`codex-history` works on local Codex data files on your machine. It lists conversations using the same short titles shown by Codex when available, lets you narrow the list with `--grep`, and deletes one resolved conversation only after confirmation.
+`codex-history` works on local Codex data files on your machine. It lists conversations using the same short titles shown by Codex when available, lets you narrow the list with `--grep`, and deletes resolved conversations or orphaned data only after confirmation.
 
 ## Install
 
@@ -51,6 +51,7 @@ codex-history doctor
 codex-history list
 codex-history list --grep "Astro"
 codex-history purge 019e6885
+codex-history purge-orphans
 ```
 
 `purge` prints the resolved conversation and asks you to type the standard short id before it deletes anything:
@@ -75,6 +76,7 @@ Type 019e6885 to confirm:
 | `codex-history list` | List local conversations. |
 | `codex-history list --grep <keyword>` | Filter conversations by title, id, or cwd. |
 | `codex-history purge <id>` | Remove one resolved local conversation after confirmation. |
+| `codex-history purge-orphans` | Remove orphaned local data after confirmation. |
 
 ### `doctor`
 
@@ -141,6 +143,26 @@ codex-history purge 019e6885 --force
 
 `--force` skips only the interactive short-id confirmation. It still keeps schema validation, active-thread protection, and post-purge verification.
 
+### `purge-orphans`
+
+Remove orphaned local data: conversations whose `state_5.sqlite.threads.rollout_path` points to a missing session or archived session file, and logs-only records that remain in `logs_2.sqlite.logs` without a matching thread in the `threads` table.
+
+```bash
+codex-history purge-orphans
+```
+
+The command first prints a cleanup plan, affected SQLite row counts, files to delete, and an estimated local disk space impact. You must type `purge-orphans` before it executes.
+
+For scripts or non-interactive shells, use `--force`:
+
+```bash
+codex-history purge-orphans --force
+```
+
+`--force` skips only interactive confirmation. It still keeps schema validation, active-thread protection, and post-purge verification. `purge-orphans` does not support JSON output.
+
+Space reporting is an estimate. After SQLite rows are deleted, database files may not shrink until Codex or another SQLite maintenance step runs vacuum.
+
 ## Options
 
 ```bash
@@ -151,6 +173,7 @@ codex-history --json purge 019e6885 --force
 
 - `--codex-home` defaults to `~/.codex`.
 - `--json` prints machine-readable output. For `purge`, JSON output requires `--force` because interactive confirmation is text-only.
+- `purge-orphans` does not support JSON output.
 - Color is enabled only in interactive terminals and respects `NO_COLOR`.
 
 ## Safety

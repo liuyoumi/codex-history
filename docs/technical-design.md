@@ -28,6 +28,7 @@ Suggested modules:
 - `schema`: validate supported Codex data model
 - `threads`: list, filter, and resolve thread candidates
 - `planner`: build purge plans before mutation
+- `orphans`: find missing-rollout and logs-only orphan cleanup candidates
 - `sqlite`: execute database mutations with transactions and checkpoints
 - `json-state`: mutate structured JSON and JSONL state files
 - `files`: remove rollout files and shell snapshots
@@ -67,6 +68,30 @@ Purge execution should use these steps:
 7. Verify no supported store still references the thread id.
 
 Interactive `purge` shows the resolved target after step 3 and requires the user to type the standard short id before continuing. `--force` skips only that interactive confirmation.
+
+## Orphan Cleanup Strategy
+
+`purge-orphans` handles supported local data whose rollout file is already missing, plus logs-only records that no longer have a matching thread row.
+
+Candidate types:
+
+- thread rows whose `rollout_path` points to a missing session or archived session file
+- logs-only thread ids present in `logs_2.sqlite.logs` but absent from `state_5.sqlite.threads`
+
+Execution should:
+
+1. Validate the supported data model.
+2. Build a complete cleanup plan.
+3. Refuse active orphan thread targets when detectable.
+4. Require typing `purge-orphans` unless `--force` is used.
+5. Reuse single-thread purge behavior for missing-rollout threads.
+6. Delete only matching `logs_2.sqlite.logs` rows for logs-only orphan ids.
+7. Checkpoint SQLite WAL files.
+8. Verify supported stores after mutation.
+
+Branch relationships are not recursive cleanup rules. If an orphaned parent has a valid child, only the orphaned parent and the edge that references it should be removed.
+
+The command should report affected row counts, file deletion counts, and estimated local disk space affected. The estimate must not claim that SQLite database files shrink immediately, because automatic `VACUUM` remains out of scope.
 
 ## Purge Plan
 

@@ -26,10 +26,14 @@ codex-history list
 codex-history list --grep "keyword"
 codex-history purge <thread_id>
 codex-history purge <thread_id> --force
+codex-history purge-orphans
+codex-history purge-orphans --force
 codex-history doctor
 ```
 
-Deletion must internally resolve to exactly one Codex thread id before modifying local data.
+Single-thread deletion must internally resolve to exactly one Codex thread id before modifying local data.
+
+Orphan cleanup must build a complete cleanup plan before modifying local data. It should target threads whose rollout files are missing and logs-only thread ids that no longer exist in `state_5.sqlite.threads`.
 
 `doctor` checks whether the local Codex data model is supported by the installed tool version.
 
@@ -42,6 +46,13 @@ Deletion must internally resolve to exactly one Codex thread id before modifying
 5. User types the standard short id to confirm deletion.
 6. Tool executes purge and verifies that the target thread id is no longer present in supported local Codex data stores.
 
+For orphan cleanup:
+
+1. User runs `purge-orphans`.
+2. Tool displays orphan thread counts, logs-only orphan counts, affected SQLite rows, files to delete, and estimated local disk space affected.
+3. User types `purge-orphans` to confirm cleanup.
+4. Tool executes cleanup and verifies supported local Codex data stores.
+
 ## Non-Goals
 
 - Do not claim to delete server-side OpenAI or Codex service data.
@@ -50,6 +61,7 @@ Deletion must internally resolve to exactly one Codex thread id before modifying
 - Do not implement destructive behavior before the requirements and technical design are reviewed and accepted.
 - Do not support fuzzy-match destructive deletion in `0.1`.
 - Do not mutate global Codex files when schema validation fails.
+- Do not expand orphan cleanup across parent or child branch relationships unless that related thread is independently orphaned.
 
 ## First Release Scope
 
@@ -58,6 +70,8 @@ Version `0.1` should support:
 - list local threads from `~/.codex/state_5.sqlite`
 - filter by displayed title, id, and cwd with `list --grep`
 - purge by unique thread id
+- purge orphaned local data whose rollout files are missing
+- purge logs-only orphan records without treating them as full threads
 - remove related local records from supported Codex stores
 - `doctor` command for data model checks
 - fixture-based tests for purge planning and purge execution
@@ -72,6 +86,9 @@ The tool must make destructive behavior intentionally boring and hard to trigger
 - non-interactive purge requires `--force`.
 - `--force` skips only interactive confirmation.
 - successful purge must print a verification summary.
+- `purge-orphans` must show a cleanup plan before deletion.
+- interactive orphan cleanup requires typing `purge-orphans` before deletion.
+- orphan cleanup must report estimated local disk space affected without promising that SQLite database files immediately shrink.
 
 ## Recovery Requirements
 
@@ -92,5 +109,6 @@ Fail without modifying data when:
 - selected thread cannot be resolved uniquely
 - selected thread appears active
 - purge plan cannot account for a supported store
+- orphan cleanup cannot build a complete supported-store plan
 
 If purge starts and a later step fails, the tool must report partial work and verification failures clearly.

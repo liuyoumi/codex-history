@@ -57,7 +57,7 @@ The tool should validate that required columns exist before executing any operat
 
 ## Purge Strategy
 
-Purge execution should use these steps:
+Single-target purge execution should use these steps:
 
 1. Resolve input to exactly one thread.
 2. Reject if the thread appears active or loaded.
@@ -68,6 +68,14 @@ Purge execution should use these steps:
 7. Verify no supported store still references the thread id.
 
 Interactive `purge` shows the resolved target after step 3 and requires the user to type the standard short id before continuing. `--force` skips only that interactive confirmation.
+
+Multi-target purge should use the same planning and mutation primitives, with these extra constraints:
+
+- resolve all provided ids or short id prefixes before mutation
+- deduplicate inputs that resolve to the same full thread id
+- refuse the whole batch before mutation if any target is missing, ambiguous, or active
+- require typing `purge-selected` before interactive batch deletion
+- summarize per-store row counts and aggregate verification failures after execution
 
 ## Orphan Cleanup Strategy
 

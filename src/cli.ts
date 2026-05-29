@@ -5,7 +5,13 @@ import { readFileSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
 import { doctorCommand } from "./commands/doctor.js";
 import { listCommand } from "./commands/list.js";
-import { executePurgePlanCommand, planPurgeCommand } from "./commands/purge.js";
+import {
+  executeBatchPurgePlanCommand,
+  executePurgePlanCommand,
+  planBatchPurgeCommand,
+  type BatchPurgeExecutionReport,
+  type BatchPurgePlan,
+} from "./commands/purge.js";
 import { executePurgeOrphansPlanCommand, planPurgeOrphansCommand } from "./commands/purge-orphans.js";
 import { CodexHistoryError, SafetyRefusalError } from "./core/errors.js";
 import type { PurgeExecutionReport } from "./core/executor.js";
@@ -69,20 +75,29 @@ program
 
 program
   .command("purge")
-  .argument("<threadId>", "Codex thread id or unique short id prefix to purge")
+  .argument("<threadIds...>", "Codex thread id(s) or unique short id prefix(es) to purge")
   .option("--force", "Skip interactive confirmation")
-  .description("Purge one local Codex conversation after target confirmation.")
-  .action((threadId: string, options) =>
+  .description("Purge local Codex conversation(s) after target confirmation.")
+  .action((threadIds: string[], options) =>
     runCommand(async () => {
       const paths = currentPaths();
-      const plan = planPurgeCommand(paths, threadId);
+      const plan = planBatchPurgeCommand(paths, threadIds);
       const force = Boolean(options.force);
+      const useBatchConfirmation = plan.requestedCount > 1;
 
-      if (!force) {
-        await confirmPurge(plan);
+      if (plan.plans.length === 1 && !useBatchConfirmation) {
+        if (!force) {
+          await confirmPurge(plan.plans[0]);
+        }
+
+        return formatPurgeResult(executePurgePlanCommand(paths, plan.plans[0]));
       }
 
-      return formatPurgeResult(executePurgePlanCommand(paths, plan));
+      if (!force) {
+        await confirmBatchPurge(plan);
+      }
+
+      return formatBatchPurgeResult(executeBatchPurgePlanCommand(paths, plan));
     }),
   );
 
@@ -153,6 +168,29 @@ async function confirmPurge(plan: PurgePlan): Promise<void> {
 
   const expected = shortId(plan.target.id);
   process.stdout.write(formatPurgeConfirmation(plan));
+
+  const readline = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  try {
+    const answer = await readline.question(`Type ${colorize("yellow", expected)} to confirm: `);
+    if (answer.trim() !== expected) {
+      throw new SafetyRefusalError("Confirmation did not match. No local Codex data was modified.");
+    }
+  } finally {
+    readline.close();
+  }
+}
+
+async function confirmBatchPurge(plan: BatchPurgePlan): Promise<void> {
+  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+    throw new SafetyRefusalError("Batch purge requires an interactive terminal. Use --force to skip confirmation.");
+  }
+
+  const expected = "purge-selected";
+  process.stdout.write(formatBatchPurgeConfirmation(plan));
 
   const readline = createInterface({
     input: process.stdin,
@@ -295,6 +333,43 @@ function formatPurgeResult(result: PurgeExecutionReport): string {
   return lines.join("\n");
 }
 
+function formatBatchPurgeResult(result: BatchPurgeExecutionReport): string {
+  const sqliteChanges = aggregateBatchSqliteChanges(result);
+  const jsonChanged = result.purgeReports
+    .flatMap((report) => report.json)
+    .filter((change) => change.changed).length;
+  const filesDeleted = result.purgeReports.flatMap((report) => report.files).filter((change) => change.deleted).length;
+  const lines = [
+    colorize("green", "Batch purge executed."),
+    "",
+    "Summary:",
+    `- Requested targets: ${result.plan.requestedCount}`,
+    `- Unique targets purged: ${result.plan.plans.length}`,
+    `- Duplicate inputs skipped: ${result.plan.duplicateInputs.length}`,
+    `- SQLite row changes: ${sqliteChanges.reduce((sum, change) => sum + change.rows, 0)}`,
+    `- JSON/JSONL file changes: ${jsonChanged}`,
+    `- Files deleted: ${filesDeleted}`,
+    "",
+    "SQLite changes:",
+    ...formatSqliteRows(sqliteChanges),
+    "",
+    `Verification: ${result.verification.success ? colorize("green", "passed") : colorize("red", "failed")}`,
+  ];
+
+  if (result.verification.remainingReferences.length > 0) {
+    lines.push(
+      "",
+      "Remaining references:",
+      ...result.verification.remainingReferences.map(
+        (reference) => `- ${reference.store}: ${reference.path} (${reference.detail})`,
+      ),
+    );
+    process.exitCode = 1;
+  }
+
+  return lines.join("\n");
+}
+
 function formatPurgeOrphansPlan(plan: PurgeOrphansPlan): string {
   if (!hasPurgeOrphansWork(plan)) {
     return "No orphaned local Codex data found.";
@@ -356,6 +431,23 @@ function formatPurgeConfirmation(plan: PurgePlan): string {
   ].join("\n");
 }
 
+function formatBatchPurgeConfirmation(plan: BatchPurgePlan): string {
+  return [
+    "About to purge selected local Codex conversations:",
+    "",
+    `Requested targets: ${plan.requestedCount}`,
+    `Unique targets: ${plan.plans.length}`,
+    `Duplicate inputs skipped: ${plan.duplicateInputs.length}`,
+    "",
+    "SQLite row changes:",
+    ...formatSqliteRows(summarizePlannedSqliteRows(plan.plans)),
+    "",
+    ...formatBatchPurgeExamples(plan),
+    colorize("dim", "This cannot be undone."),
+    "",
+  ].join("\n");
+}
+
 function formatPurgeOrphansConfirmation(plan: PurgeOrphansPlan): string {
   return [
     "About to purge orphaned local Codex data:",
@@ -402,6 +494,59 @@ function formatOrphanExamples(plan: PurgeOrphansPlan): string[] {
   }
 
   return lines;
+}
+
+function formatBatchPurgeExamples(plan: BatchPurgePlan): string[] {
+  const examples = plan.plans.slice(0, 5).map((item) => {
+    const target = item.target;
+    return `- ${shortId(target.id)}  ${displayTitle(target.title)}  ${colorize("dim", target.cwd)}`;
+  });
+
+  if (examples.length === 0) {
+    return [];
+  }
+
+  const lines = ["Targets:", ...examples, ""];
+  if (plan.plans.length > examples.length) {
+    lines.push(`Showing ${examples.length} of ${plan.plans.length} target(s).`, "");
+  }
+
+  return lines;
+}
+
+function summarizePlannedSqliteRows(plans: PurgePlan[]): Array<{ store: string; rows: number }> {
+  const rows = new Map<string, number>();
+
+  for (const plan of plans) {
+    for (const store of plan.stores) {
+      if (store.action !== "delete_rows" && store.store !== "state_db.agent_job_items") {
+        continue;
+      }
+      if (!store.count || store.count <= 0) {
+        continue;
+      }
+
+      rows.set(store.store, (rows.get(store.store) ?? 0) + store.count);
+    }
+  }
+
+  return [...rows.entries()]
+    .map(([store, count]) => ({ store, rows: count }))
+    .sort((a, b) => a.store.localeCompare(b.store));
+}
+
+function aggregateBatchSqliteChanges(result: BatchPurgeExecutionReport): Array<{ store: string; rows: number }> {
+  const changes = new Map<string, number>();
+  for (const report of result.purgeReports) {
+    for (const change of report.sqlite) {
+      changes.set(change.store, (changes.get(change.store) ?? 0) + change.changedRows);
+    }
+  }
+
+  return [...changes.entries()]
+    .filter(([, rows]) => rows > 0)
+    .map(([store, rows]) => ({ store, rows }))
+    .sort((a, b) => a.store.localeCompare(b.store));
 }
 
 function aggregateOrphanSqliteChanges(result: PurgeOrphansExecutionReport): Array<{ store: string; rows: number }> {

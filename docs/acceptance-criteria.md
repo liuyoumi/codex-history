@@ -21,6 +21,7 @@ The `feat/history-cli-mvp` milestone is complete when:
 - `codex-history list` reads threads from a fixture `state_5.sqlite`
 - `codex-history list --grep <keyword>` matches displayed title, id, and cwd
 - `codex-history purge <id>` requires interactive short-id confirmation before mutation
+- `codex-history purge <id> <id>` requires interactive batch confirmation before mutation
 - `codex-history purge <id> --force` executes without interactive confirmation
 - `--codex-home <path>` works for all commands
 - tests do not read or write the developer's real `~/.codex`

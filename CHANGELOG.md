@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Allow `purge` to accept multiple thread ids or unique short id prefixes in one guarded batch.
+
 ## 0.2.0 - 2026-05-29
 
 ### Removed

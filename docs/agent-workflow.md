@@ -68,6 +68,13 @@ Agent-owned release steps:
 - create the release commit and tag
 - push the release commit and tag to GitHub
 
+Version selection guidance:
+
+- Use a patch version for documentation updates, packaging fixes, internal refactors, and bug fixes that do not add user-visible behavior.
+- Use a minor version for new commands, new options, new supported cleanup scopes, new output fields, or other backward-compatible user-visible features.
+- Use a major version for breaking CLI changes, removed commands or options, changed destructive defaults, or incompatible output/schema changes.
+- When the change touches destructive behavior, safety guarantees, or storage scope, state the version bump rationale before editing package metadata.
+
 The user normally runs `npm publish` manually. Publishing may require browser OAuth, account switching, OTP, or npm trust prompts, and it mutates the public registry. The agent may run `npm publish` only when the user explicitly asks for it and the correct npm credentials are already configured in the environment.
 
 ## Final Checks

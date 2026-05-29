@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Removed
+
+- Remove the public `--json` output mode so the CLI stays focused on human-reviewed cleanup workflows.
+
 ## 0.1.4 - 2026-05-29
 
 ### Added

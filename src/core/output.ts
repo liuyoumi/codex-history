@@ -1,11 +1,4 @@
-export type OutputMode = "text" | "json";
-
-export function printOutput(value: unknown, mode: OutputMode): void {
-  if (mode === "json") {
-    console.log(JSON.stringify(value, null, 2));
-    return;
-  }
-
+export function printOutput(value: unknown): void {
   if (typeof value === "string") {
     if (value.length === 0) {
       return;

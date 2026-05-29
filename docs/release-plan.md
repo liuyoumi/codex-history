@@ -33,7 +33,6 @@ Required features:
 - `list`
 - `list --grep`
 - purge plan builder
-- JSON output
 - fixture test harness
 - `--codex-home` support
 

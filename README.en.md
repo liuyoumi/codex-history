@@ -159,7 +159,7 @@ For scripts or non-interactive shells, use `--force`:
 codex-history purge-orphans --force
 ```
 
-`--force` skips only interactive confirmation. It still keeps schema validation, active-thread protection, and post-purge verification. `purge-orphans` does not support JSON output.
+`--force` skips only interactive confirmation. It still keeps schema validation, active-thread protection, and post-purge verification.
 
 Space reporting is an estimate. After SQLite rows are deleted, database files may not shrink until Codex or another SQLite maintenance step runs vacuum.
 
@@ -167,13 +167,9 @@ Space reporting is an estimate. After SQLite rows are deleted, database files ma
 
 ```bash
 codex-history --codex-home /path/to/.codex list
-codex-history --json list --grep "Astro"
-codex-history --json purge 019e6885 --force
 ```
 
 - `--codex-home` defaults to `~/.codex`.
-- `--json` prints machine-readable output. For `purge`, JSON output requires `--force` because interactive confirmation is text-only.
-- `purge-orphans` does not support JSON output.
 - Color is enabled only in interactive terminals and respects `NO_COLOR`.
 
 ## Safety

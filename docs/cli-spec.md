@@ -59,7 +59,8 @@ Default behavior:
 - sort by `updated_at` descending
 - show one-line rows
 - read all rows unless `--limit` is provided
-- filter by thread id, title, and cwd when `--grep` is provided
+- filter by title, first user message, and preview when `--grep` is provided
+- filter by working-directory path fragment when `--cwd` is provided
 - use pager in an interactive terminal when no limit is provided
 - skip pager automatically when output is piped or redirected
 
@@ -82,13 +83,15 @@ Default behavior:
 
 `--grep` fields:
 
-- thread id
 - title
-- cwd
+- first user message
+- preview
 
 `--grep` reads all rows before applying `--limit`, so a cap only limits displayed matches.
 
 `--grep` is case-insensitive for ASCII text. Locale-sensitive fuzzy matching is not required in `0.1`.
+
+`--cwd` matches cwd path fragments case-insensitively for ASCII text. Full paths remain valid because they are also path fragments.
 
 Prompt bodies are not searched because this tool is meant to match Codex history list entries, not dump transcript content.
 
@@ -112,6 +115,8 @@ Default behavior:
 - require the user to type `purge-selected` before multi-target deletion
 - allow filter mode with `--cwd`, `--grep`, and `--archived`
 - combine purge filters as an intersection when more than one is provided
+- treat `--cwd` as a working-directory path-fragment match
+- treat `--grep` as a conversation-text match over title, first user message, and preview
 - reject commands that combine explicit ids with purge filters
 - reject commands that provide neither ids nor purge filters
 - report no-op success when filters match no conversations

@@ -77,10 +77,10 @@ Type 019e6885 to confirm:
 | --- | --- |
 | `codex-history doctor` | Check whether the local Codex data layout is supported. |
 | `codex-history list` | List local conversations. |
-| `codex-history list --grep <keyword>` | Filter conversations by title, id, or cwd. |
+| `codex-history list --grep <keyword>` | Filter conversations by title, first user message, or preview. |
 | `codex-history purge <id...>` | Remove one or more resolved local conversations after confirmation. |
-| `codex-history purge --cwd <path>` | Remove local conversations matching a working directory after confirmation. |
-| `codex-history purge --grep <keyword>` | Remove local conversations matching title, id, or cwd after confirmation. |
+| `codex-history purge --cwd <path>` | Remove local conversations whose working directory contains the path fragment after confirmation. |
+| `codex-history purge --grep <keyword>` | Remove local conversations matching title, first user message, or preview after confirmation. |
 | `codex-history purge-orphans` | Remove orphaned local data after confirmation. |
 
 ### `doctor`
@@ -112,7 +112,13 @@ Default output is one line per conversation:
 019e6874  Review Astro blog visual plan
 ```
 
-`--grep` filters by displayed title, thread id, and cwd. It does not search or print prompt bodies.
+`--grep` filters by displayed title, first user message, and preview. It does not match thread ids or cwd values, and it does not search or print full transcript bodies.
+
+`--cwd` filters by a working-directory path fragment, so you can provide either a full path or a project name / partial path:
+
+```bash
+codex-history list --cwd codex-history
+```
 
 Use the short id shown by `list`, or paste a full thread id, when running `purge`.
 
@@ -152,7 +158,7 @@ codex-history purge --archived
 codex-history purge --cwd /Users/me/Projects/example --grep "Astro"
 ```
 
-`--cwd`, `--grep`, and `--archived` can be combined. Combined filters delete only conversations that match every provided condition. By default, filter mode matches non-archived conversations only; use `--archived` to target archived conversations. Filtered purge prints a batch plan and requires typing `purge-selected`. Filters cannot be combined with explicit ids.
+`--cwd`, `--grep`, and `--archived` can be combined. Combined filters delete only conversations that match every provided condition. `--cwd` matches working-directory path fragments, while `--grep` matches only title, first user message, and preview. By default, filter mode matches non-archived conversations only; use `--archived` to target archived conversations. Filtered purge prints a batch plan and matched cwd values, then requires typing `purge-selected`. Filters cannot be combined with explicit ids.
 
 For scripts or non-interactive shells, use `--force`:
 

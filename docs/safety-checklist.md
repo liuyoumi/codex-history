@@ -9,7 +9,7 @@
 - [x] Require interactive short-id confirmation unless `--force` is used.
 - [x] Require interactive `purge-selected` confirmation for multi-target or filtered purge unless `--force` is used.
 - [x] Refuse to purge active thread.
-- [x] Refuse fuzzy destructive deletion.
+- [x] Refuse destructive deletion without explicit ids or explicit purge filters.
 - [x] Reject purge commands that mix explicit ids with filters.
 - [x] Validate SQLite schema.
 - [x] Validate JSON file shapes.

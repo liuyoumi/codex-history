@@ -77,10 +77,10 @@ Type 019e6885 to confirm:
 | --- | --- |
 | `codex-history doctor` | 检查当前本地 Codex 数据结构是否受支持。 |
 | `codex-history list` | 列出本地对话。 |
-| `codex-history list --grep <keyword>` | 按标题、id 或 cwd 过滤对话。 |
+| `codex-history list --grep <keyword>` | 按标题、首条用户消息或预览过滤对话。 |
 | `codex-history purge <id...>` | 确认后删除一条或多条解析到的本地对话。 |
-| `codex-history purge --cwd <path>` | 确认后删除匹配工作目录的本地对话。 |
-| `codex-history purge --grep <keyword>` | 确认后删除匹配标题、id 或 cwd 的本地对话。 |
+| `codex-history purge --cwd <path>` | 确认后删除工作目录路径包含该片段的本地对话。 |
+| `codex-history purge --grep <keyword>` | 确认后删除匹配标题、首条用户消息或预览的本地对话。 |
 | `codex-history purge-orphans` | 确认后清理本地孤儿数据。 |
 
 ### `doctor`
@@ -112,7 +112,13 @@ codex-history list --pretty=full
 019e6874  评审 Astro 博客视觉方案
 ```
 
-`--grep` 会按显示标题、线程 id、cwd 过滤。它不会搜索或输出对话正文。
+`--grep` 会按显示标题、首条用户消息和预览过滤。它不会匹配线程 id 或 cwd，也不会搜索或输出完整对话正文。
+
+`--cwd` 会按工作目录路径片段过滤，既可以输入完整路径，也可以输入项目名或部分路径：
+
+```bash
+codex-history list --cwd codex-history
+```
 
 执行 `purge` 时，可以使用 `list` 里显示的短 id，也可以粘贴完整 thread id。
 
@@ -152,7 +158,7 @@ codex-history purge --archived
 codex-history purge --cwd /Users/me/Projects/example --grep "Astro"
 ```
 
-`--cwd`、`--grep`、`--archived` 可以组合，组合后只删除同时满足全部条件的对话。默认只匹配未归档对话；如果要删除已归档对话，请使用 `--archived`。过滤式删除会展示批量计划，并要求输入 `purge-selected` 确认。过滤条件不能和 id 同时使用。
+`--cwd`、`--grep`、`--archived` 可以组合，组合后只删除同时满足全部条件的对话。`--cwd` 会匹配工作目录路径片段，`--grep` 只匹配标题、首条用户消息和预览。默认只匹配未归档对话；如果要删除已归档对话，请使用 `--archived`。过滤式删除会展示批量计划和匹配到的 cwd，并要求输入 `purge-selected` 确认。过滤条件不能和 id 同时使用。
 
 脚本或非交互环境可以使用 `--force`：
 

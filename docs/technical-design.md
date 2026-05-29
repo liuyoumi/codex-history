@@ -81,6 +81,8 @@ Filtered purge should use the same batch purge primitive after selecting threads
 
 - accept `--cwd`, `--grep`, and `--archived`
 - combine filters as an intersection
+- match `--cwd` against working-directory path fragments
+- match `--grep` against conversation text fields only: display title, source title, first user message, and preview
 - reject filter mode with no filters
 - reject commands that mix explicit ids with filters
 - match non-archived conversations by default unless `--archived` is provided

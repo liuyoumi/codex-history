@@ -57,8 +57,8 @@ program
   .option("--limit <number>", "Maximum rows to show", parseInteger)
   .option("--all", "Include archived and non-archived threads")
   .option("--archived", "Show archived threads")
-  .option("--cwd <path>", "Filter by exact working directory")
-  .option("--grep <keyword>", "Filter by title, id, or cwd keyword")
+  .option("--cwd <path>", "Filter by working directory path fragment")
+  .option("--grep <keyword>", "Filter by title, first user message, or preview keyword")
   .option("--pretty <format>", "Output format: oneline, medium, full", parsePretty, "oneline")
   .action((options) =>
     runCommand(() =>
@@ -80,8 +80,8 @@ program
   .command("purge")
   .argument("[threadIds...]", "Codex thread id(s) or unique short id prefix(es) to purge")
   .option("--force", "Skip interactive confirmation")
-  .option("--cwd <path>", "Filter conversations by exact working directory")
-  .option("--grep <keyword>", "Filter conversations by title, id, or cwd keyword")
+  .option("--cwd <path>", "Filter conversations by working directory path fragment")
+  .option("--grep <keyword>", "Filter conversations by title, first user message, or preview keyword")
   .option("--archived", "Filter archived conversations")
   .description("Purge local Codex conversation(s) after target confirmation.")
   .action((threadIds: string[], options) =>
@@ -470,6 +470,7 @@ function formatBatchPurgeConfirmation(plan: BatchPurgePlan): string {
     "SQLite row changes:",
     ...formatSqliteRows(summarizePlannedSqliteRows(plan.plans)),
     "",
+    ...formatMatchedCwdValues(plan),
     ...formatBatchPurgeExamples(plan),
     colorize("dim", "This cannot be undone."),
     "",
@@ -487,16 +488,32 @@ function formatBatchPurgeSelection(plan: BatchPurgePlan): string {
 function formatPurgeFilters(filters: PurgeFilterOptions): string {
   const parts = [];
   if (filters.cwd) {
-    parts.push(`cwd=${filters.cwd}`);
+    parts.push(`cwd contains "${filters.cwd}"`);
   }
   if (filters.grep) {
-    parts.push(`grep=${filters.grep}`);
+    parts.push(`grep="${filters.grep}"`);
   }
   if (filters.archived) {
     parts.push("archived=true");
   }
 
   return parts.length > 0 ? parts.join(", ") : "filtered conversations";
+}
+
+function formatMatchedCwdValues(plan: BatchPurgePlan): string[] {
+  if (plan.source !== "filtered" || !plan.filters?.cwd || plan.plans.length === 0) {
+    return [];
+  }
+
+  const cwdValues = [...new Set(plan.plans.map((item) => item.target.cwd))].sort();
+  const shown = cwdValues.slice(0, 5);
+  const lines = ["Matched cwd values:", ...shown.map((cwd) => `- ${colorize("dim", cwd)}`), ""];
+
+  if (cwdValues.length > shown.length) {
+    lines.push(`Showing ${shown.length} of ${cwdValues.length} cwd value(s).`, "");
+  }
+
+  return lines;
 }
 
 function formatPurgeOrphansConfirmation(plan: PurgeOrphansPlan): string {

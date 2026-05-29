@@ -51,13 +51,19 @@ describe("mvp commands", () => {
     expect(threads).toHaveLength(3);
   });
 
-  it("greps displayed thread titles without matching prompt bodies", () => {
+  it("greps readable conversation text without matching ids or cwd", () => {
     const fixture = createCodexFixture();
     const titleMatches = listCommand(fixture.paths, { all: true, grep: "Keep" });
-    const promptMatches = listCommand(fixture.paths, { all: true, grep: "please delete" });
+    const firstUserMatches = listCommand(fixture.paths, { all: true, grep: "please delete" });
+    const previewMatches = listCommand(fixture.paths, { all: true, grep: "duplicate preview" });
+    const idMatches = listCommand(fixture.paths, { all: true, grep: "thread-1" });
+    const cwdMatches = listCommand(fixture.paths, { all: true, grep: "project-a" });
 
     expect(titleMatches.map((thread) => thread.id)).toEqual(["thread-2"]);
-    expect(promptMatches).toHaveLength(0);
+    expect(firstUserMatches.map((thread) => thread.id)).toEqual(["thread-1"]);
+    expect(previewMatches.map((thread) => thread.id)).toEqual(["thread-3"]);
+    expect(idMatches).toHaveLength(0);
+    expect(cwdMatches).toHaveLength(0);
   });
 
   it("applies list limits after grepping all displayed titles", () => {
@@ -65,6 +71,15 @@ describe("mvp commands", () => {
     const matches = listCommand(fixture.paths, { all: true, grep: "Keep", limit: 1 });
 
     expect(matches.map((thread) => thread.id)).toEqual(["thread-2"]);
+  });
+
+  it("matches cwd by path fragment", () => {
+    const fixture = createCodexFixture();
+    const exactMatches = listCommand(fixture.paths, { cwd: "/tmp/project-a" });
+    const fragmentMatches = listCommand(fixture.paths, { cwd: "project" });
+
+    expect(exactMatches.map((thread) => thread.id)).toEqual(["thread-1"]);
+    expect(fragmentMatches.map((thread) => thread.id)).toEqual(["thread-3", "thread-2", "thread-1"]);
   });
 
   it("builds a purge plan by id", () => {
@@ -159,11 +174,18 @@ describe("mvp commands", () => {
 
   it("plans filtered purge by cwd", () => {
     const fixture = createCodexFixture();
-    const plan = planFilteredPurgeCommand(fixture.paths, { cwd: "/tmp/project-a" });
+    const plan = planFilteredPurgeCommand(fixture.paths, { cwd: "project-a" });
 
     expect(plan.source).toBe("filtered");
     expect(plan.plans.map((item) => item.target.id)).toEqual(["thread-1"]);
-    expect(plan.filters).toEqual({ cwd: "/tmp/project-a" });
+    expect(plan.filters).toEqual({ cwd: "project-a" });
+  });
+
+  it("plans filtered purge by cwd fragment", () => {
+    const fixture = createCodexFixture();
+    const plan = planFilteredPurgeCommand(fixture.paths, { cwd: "project" });
+
+    expect(plan.plans.map((item) => item.target.id)).toEqual(["thread-3", "thread-2", "thread-1"]);
   });
 
   it("plans filtered purge with combined archived and cwd filters", () => {

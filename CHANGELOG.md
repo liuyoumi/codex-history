@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Narrow `--grep` matching to conversation text fields and let `--cwd` match working-directory path fragments.
+
 ## 0.4.0 - 2026-05-29
 
 ### Added

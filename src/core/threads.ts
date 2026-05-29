@@ -51,8 +51,8 @@ export function listThreads(paths: ResolvedPaths, options: ListThreadsOptions = 
   }
 
   if (options.cwd) {
-    where.push(`${quoteIdentifier("cwd")} = ?`);
-    params.push(options.cwd);
+    where.push(`lower(${quoteIdentifier("cwd")}) like lower(?) escape '\\'`);
+    params.push(`%${escapeLike(options.cwd)}%`);
   }
 
   const whereClause = where.length > 0 ? `where ${where.join(" and ")}` : "";
@@ -89,9 +89,10 @@ function filterThreads(threads: ThreadSummary[], keyword: string): ThreadSummary
   const normalizedKeyword = keyword.toLocaleLowerCase();
   return threads.filter((thread) => {
     const haystack = [
-      thread.id,
       thread.title,
-      thread.cwd,
+      thread.sourceTitle,
+      thread.firstUserMessage,
+      thread.preview,
     ]
       .join("\n")
       .toLocaleLowerCase();

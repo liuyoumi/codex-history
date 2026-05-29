@@ -4,7 +4,12 @@ import Database from "better-sqlite3";
 import { afterEach, describe, expect, it } from "vitest";
 import { doctorCommand } from "../src/commands/doctor.js";
 import { listCommand } from "../src/commands/list.js";
-import { planPurgeCommand, purgeCommand } from "../src/commands/purge.js";
+import {
+  executeBatchPurgePlanCommand,
+  planBatchPurgeCommand,
+  planPurgeCommand,
+  purgeCommand,
+} from "../src/commands/purge.js";
 import { executePurgeOrphansPlanCommand, planPurgeOrphansCommand } from "../src/commands/purge-orphans.js";
 import { SafetyRefusalError } from "../src/core/errors.js";
 import { createCodexFixture } from "./helpers/fixture.js";
@@ -108,6 +113,61 @@ describe("mvp commands", () => {
       expect(threadCount.count).toBe(0);
       expect(toolCount.count).toBe(0);
       expect(assignedCount.count).toBe(0);
+    } finally {
+      stateDb.close();
+    }
+  });
+
+  it("plans batch purge with duplicate target inputs deduplicated", () => {
+    const fixture = createCodexFixture();
+    const plan = planBatchPurgeCommand(fixture.paths, ["thread-1", "thread-1"]);
+
+    expect(plan.mode).toBe("planned");
+    expect(plan.requestedCount).toBe(2);
+    expect(plan.plans.map((item) => item.target.id)).toEqual(["thread-1"]);
+    expect(plan.duplicateInputs).toEqual([{ input: "thread-1", targetId: "thread-1" }]);
+  });
+
+  it("executes batch purge for multiple explicit targets", () => {
+    const fixture = createCodexFixture({ includeOrphans: true });
+    const plan = planBatchPurgeCommand(fixture.paths, ["thread-1", "thread-orphan"]);
+    const result = executeBatchPurgePlanCommand(fixture.paths, plan);
+
+    expect(result.mode).toBe("executed");
+    expect(result.verification.success).toBe(true);
+    expect(result.purgeReports).toHaveLength(2);
+
+    const stateDb = new Database(fixture.paths.stateDb, { readonly: true });
+    const logsDb = new Database(fixture.paths.logsDb, { readonly: true });
+    try {
+      const threadRows = stateDb
+        .prepare("select count(*) as count from threads where id in (?, ?)")
+        .get("thread-1", "thread-orphan") as { count: number };
+      const logRows = logsDb
+        .prepare("select count(*) as count from logs where thread_id in (?, ?)")
+        .get("thread-1", "thread-orphan") as { count: number };
+
+      expect(threadRows.count).toBe(0);
+      expect(logRows.count).toBe(0);
+    } finally {
+      stateDb.close();
+      logsDb.close();
+    }
+  });
+
+  it("refuses batch purge before mutation when any target is active", () => {
+    const fixture = createCodexFixture();
+    process.env.CODEX_THREAD_ID = "thread-2";
+    const plan = planBatchPurgeCommand(fixture.paths, ["thread-1", "thread-2"]);
+
+    expect(() => executeBatchPurgePlanCommand(fixture.paths, plan)).toThrow(SafetyRefusalError);
+
+    const stateDb = new Database(fixture.paths.stateDb, { readonly: true });
+    try {
+      const row = stateDb.prepare("select count(*) as count from threads where id = ?").get("thread-1") as {
+        count: number;
+      };
+      expect(row.count).toBe(1);
     } finally {
       stateDb.close();
     }

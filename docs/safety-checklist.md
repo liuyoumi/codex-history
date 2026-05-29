@@ -3,8 +3,10 @@
 ## Before Purge
 
 - [x] Resolve user input to exactly one thread id.
+- [x] Resolve every explicit batch purge target before mutation.
 - [x] Show title, full id, cwd, and updated time before confirmation.
 - [x] Require interactive short-id confirmation unless `--force` is used.
+- [x] Require interactive `purge-selected` confirmation for multi-target purge unless `--force` is used.
 - [x] Refuse to purge active thread.
 - [x] Refuse fuzzy destructive deletion.
 - [x] Validate SQLite schema.

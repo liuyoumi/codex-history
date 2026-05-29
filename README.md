@@ -51,6 +51,7 @@ codex-history doctor
 codex-history list
 codex-history list --grep "Astro"
 codex-history purge 019e6885
+codex-history purge 019e6885 019e6874
 codex-history purge-orphans
 ```
 
@@ -75,7 +76,7 @@ Type 019e6885 to confirm:
 | `codex-history doctor` | 检查当前本地 Codex 数据结构是否受支持。 |
 | `codex-history list` | 列出本地对话。 |
 | `codex-history list --grep <keyword>` | 按标题、id 或 cwd 过滤对话。 |
-| `codex-history purge <id>` | 确认后删除一条解析到的本地对话。 |
+| `codex-history purge <id...>` | 确认后删除一条或多条解析到的本地对话。 |
 | `codex-history purge-orphans` | 确认后清理本地孤儿数据。 |
 
 ### `doctor`
@@ -129,19 +130,23 @@ codex-history list --grep "Astro 博客"
 
 ### `purge`
 
-通过完整 id 或唯一短 id 前缀删除一条本地 Codex 对话。
+通过完整 id 或唯一短 id 前缀删除一条或多条本地 Codex 对话。
 
 ```bash
 codex-history purge 019e6885
+codex-history purge 019e6885 019e6874
 ```
+
+删除多个目标时，工具会先解析全部目标并展示批量计划；只要任意一个 id 不存在、不唯一，或命中 active thread，整个批量操作都会拒绝执行，不会部分删除。交互式批量删除需要输入 `purge-selected` 确认。
 
 脚本或非交互环境可以使用 `--force`：
 
 ```bash
 codex-history purge 019e6885 --force
+codex-history purge 019e6885 019e6874 --force
 ```
 
-`--force` 只跳过交互式短 id 确认，不会跳过数据结构校验、active thread 保护和删除后的验证。
+`--force` 只跳过交互确认，不会跳过数据结构校验、active thread 保护和删除后的验证。
 
 ### `purge-orphans`
 

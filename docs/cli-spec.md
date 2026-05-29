@@ -96,20 +96,23 @@ Prompt bodies are not searched because this tool is meant to match Codex history
 
 ```bash
 codex-history purge <thread_id>
+codex-history purge <thread_id> <thread_id>
 codex-history purge <thread_id> --force
 ```
 
 Default behavior:
 
-- resolve the target to a unique full id or short id prefix
+- resolve every target to a unique full id or short id prefix before mutation
 - print the target short id, title, full id, updated time, and cwd
-- require the user to type the standard short id before deletion
+- require the user to type the standard short id before single-target deletion
+- require the user to type `purge-selected` before multi-target deletion
 - refuse non-interactive execution unless `--force` is provided
 
 Execution behavior:
 
-- requires a unique thread id or unique short id prefix
-- refuses active threads
+- requires every provided target to resolve uniquely
+- deduplicates repeated inputs that resolve to the same thread
+- refuses the whole batch if any target appears active
 - runs verification after mutation
 
 `--force` skips only interactive confirmation. It does not skip schema validation, active-thread checks, or verification.

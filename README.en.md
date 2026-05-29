@@ -51,6 +51,7 @@ codex-history doctor
 codex-history list
 codex-history list --grep "Astro"
 codex-history purge 019e6885
+codex-history purge 019e6885 019e6874
 codex-history purge-orphans
 ```
 
@@ -75,7 +76,7 @@ Type 019e6885 to confirm:
 | `codex-history doctor` | Check whether the local Codex data layout is supported. |
 | `codex-history list` | List local conversations. |
 | `codex-history list --grep <keyword>` | Filter conversations by title, id, or cwd. |
-| `codex-history purge <id>` | Remove one resolved local conversation after confirmation. |
+| `codex-history purge <id...>` | Remove one or more resolved local conversations after confirmation. |
 | `codex-history purge-orphans` | Remove orphaned local data after confirmation. |
 
 ### `doctor`
@@ -129,19 +130,23 @@ When `list` runs in an interactive terminal without `--limit`, output is sent th
 
 ### `purge`
 
-Remove one local Codex conversation by full id or unique short id prefix.
+Remove one or more local Codex conversations by full id or unique short id prefix.
 
 ```bash
 codex-history purge 019e6885
+codex-history purge 019e6885 019e6874
 ```
+
+When multiple targets are provided, the tool resolves all targets and prints a batch plan before deletion. If any id is missing, ambiguous, or active, the whole batch is refused before mutation. Interactive batch purge requires typing `purge-selected`.
 
 For scripts or non-interactive shells, use `--force`:
 
 ```bash
 codex-history purge 019e6885 --force
+codex-history purge 019e6885 019e6874 --force
 ```
 
-`--force` skips only the interactive short-id confirmation. It still keeps schema validation, active-thread protection, and post-purge verification.
+`--force` skips only interactive confirmation. It still keeps schema validation, active-thread protection, and post-purge verification.
 
 ### `purge-orphans`
 

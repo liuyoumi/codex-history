@@ -25,6 +25,7 @@ The implementation keeps path handling portable and defaults to the local Codex 
 codex-history list
 codex-history list --grep "keyword"
 codex-history purge <thread_id>
+codex-history purge <thread_id> <thread_id>
 codex-history purge <thread_id> --force
 codex-history purge-orphans
 codex-history purge-orphans --force
@@ -32,6 +33,8 @@ codex-history doctor
 ```
 
 Single-thread deletion must internally resolve to exactly one Codex thread id before modifying local data.
+
+Multi-thread deletion must resolve every provided id or short id prefix before modifying local data. If any target is missing, ambiguous, or active, the whole batch must fail before mutation.
 
 Orphan cleanup must build a complete cleanup plan before modifying local data. It should target threads whose rollout files are missing and logs-only thread ids that no longer exist in `state_5.sqlite.threads`.
 
@@ -45,6 +48,14 @@ Orphan cleanup must build a complete cleanup plan before modifying local data. I
 4. Tool displays the resolved target title, full id, updated time, and cwd.
 5. User types the standard short id to confirm deletion.
 6. Tool executes purge and verifies that the target thread id is no longer present in supported local Codex data stores.
+
+For explicit multi-target purge:
+
+1. User runs `purge <id> <id> ...`.
+2. Tool resolves all provided ids or short id prefixes.
+3. Tool displays the unique target count, skipped duplicate input count, target examples, and affected row counts.
+4. User types `purge-selected` to confirm deletion.
+5. Tool executes purge for each unique target and verifies supported local Codex data stores.
 
 For orphan cleanup:
 
@@ -69,7 +80,7 @@ Version `0.1` should support:
 
 - list local threads from `~/.codex/state_5.sqlite`
 - filter by displayed title, id, and cwd with `list --grep`
-- purge by unique thread id
+- purge by one or more unique thread ids
 - purge orphaned local data whose rollout files are missing
 - purge logs-only orphan records without treating them as full threads
 - remove related local records from supported Codex stores
@@ -83,6 +94,7 @@ The tool must make destructive behavior intentionally boring and hard to trigger
 
 - `purge` must show the resolved thread id before deletion.
 - interactive purge requires typing the standard short id before deletion.
+- interactive multi-target purge requires typing `purge-selected` before deletion.
 - non-interactive purge requires `--force`.
 - `--force` skips only interactive confirmation.
 - successful purge must print a verification summary.
@@ -108,6 +120,7 @@ Fail without modifying data when:
 - required files cannot be parsed
 - selected thread cannot be resolved uniquely
 - selected thread appears active
+- any selected batch target cannot be resolved uniquely or appears active
 - purge plan cannot account for a supported store
 - orphan cleanup cannot build a complete supported-store plan
 

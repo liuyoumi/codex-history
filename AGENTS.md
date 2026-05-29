@@ -10,7 +10,11 @@
 
 - Never test destructive purge behavior against the real user `~/.codex`.
 - Use fixtures or an explicit temporary `--codex-home` for purge validation.
-- Preserve purge guards: unique id resolution, confirmation unless `--force`, mandatory backup, active-thread protection, and verification.
+- Preserve purge guards: unique id resolution, confirmation unless `--force`, permanent deletion warning, active-thread protection, and verification.
+
+## Workflow
+
+- For user-visible code changes, bug fixes, command behavior changes, or safety-sensitive edits, follow `docs/agent-workflow.md` before implementation.
 
 ## Documentation
 

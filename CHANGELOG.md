@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Allow `purge` to select regular conversations with `--cwd`, `--grep`, and `--archived` filters.
+
 ## 0.3.0 - 2026-05-29
 
 ### Added

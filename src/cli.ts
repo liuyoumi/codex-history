@@ -8,12 +8,15 @@ import { listCommand } from "./commands/list.js";
 import {
   executeBatchPurgePlanCommand,
   executePurgePlanCommand,
+  hasPurgeFilter,
   planBatchPurgeCommand,
+  planFilteredPurgeCommand,
   type BatchPurgeExecutionReport,
   type BatchPurgePlan,
+  type PurgeFilterOptions,
 } from "./commands/purge.js";
 import { executePurgeOrphansPlanCommand, planPurgeOrphansCommand } from "./commands/purge-orphans.js";
-import { CodexHistoryError, SafetyRefusalError } from "./core/errors.js";
+import { CodexHistoryError, SafetyRefusalError, UsageError } from "./core/errors.js";
 import type { PurgeExecutionReport } from "./core/executor.js";
 import { hasPurgeOrphansWork, type PurgeOrphansExecutionReport, type PurgeOrphansPlan } from "./core/orphans.js";
 import { formatDate, printOutput, shortId } from "./core/output.js";
@@ -75,15 +78,40 @@ program
 
 program
   .command("purge")
-  .argument("<threadIds...>", "Codex thread id(s) or unique short id prefix(es) to purge")
+  .argument("[threadIds...]", "Codex thread id(s) or unique short id prefix(es) to purge")
   .option("--force", "Skip interactive confirmation")
+  .option("--cwd <path>", "Filter conversations by exact working directory")
+  .option("--grep <keyword>", "Filter conversations by title, id, or cwd keyword")
+  .option("--archived", "Filter archived conversations")
   .description("Purge local Codex conversation(s) after target confirmation.")
   .action((threadIds: string[], options) =>
     runCommand(async () => {
       const paths = currentPaths();
-      const plan = planBatchPurgeCommand(paths, threadIds);
+      const requestedThreadIds = threadIds ?? [];
+      const filters: PurgeFilterOptions = {
+        cwd: options.cwd,
+        grep: options.grep,
+        archived: Boolean(options.archived),
+      };
+      const hasExplicitTargets = requestedThreadIds.length > 0;
+      const hasFilters = hasPurgeFilter(filters);
+
+      if (hasExplicitTargets && hasFilters) {
+        throw new UsageError("Thread ids cannot be combined with --cwd, --grep, or --archived.");
+      }
+      if (!hasExplicitTargets && !hasFilters) {
+        throw new UsageError("Provide thread id(s) or at least one filter such as --cwd, --grep, or --archived.");
+      }
+
+      const plan = hasExplicitTargets
+        ? planBatchPurgeCommand(paths, requestedThreadIds)
+        : planFilteredPurgeCommand(paths, filters);
       const force = Boolean(options.force);
-      const useBatchConfirmation = plan.requestedCount > 1;
+      const useBatchConfirmation = plan.source === "filtered" || plan.requestedCount > 1;
+
+      if (plan.plans.length === 0) {
+        return "No matching local Codex conversations found.";
+      }
 
       if (plan.plans.length === 1 && !useBatchConfirmation) {
         if (!force) {
@@ -343,7 +371,7 @@ function formatBatchPurgeResult(result: BatchPurgeExecutionReport): string {
     colorize("green", "Batch purge executed."),
     "",
     "Summary:",
-    `- Requested targets: ${result.plan.requestedCount}`,
+    `- Selection: ${formatBatchPurgeSelection(result.plan)}`,
     `- Unique targets purged: ${result.plan.plans.length}`,
     `- Duplicate inputs skipped: ${result.plan.duplicateInputs.length}`,
     `- SQLite row changes: ${sqliteChanges.reduce((sum, change) => sum + change.rows, 0)}`,
@@ -435,7 +463,7 @@ function formatBatchPurgeConfirmation(plan: BatchPurgePlan): string {
   return [
     "About to purge selected local Codex conversations:",
     "",
-    `Requested targets: ${plan.requestedCount}`,
+    `Selection: ${formatBatchPurgeSelection(plan)}`,
     `Unique targets: ${plan.plans.length}`,
     `Duplicate inputs skipped: ${plan.duplicateInputs.length}`,
     "",
@@ -446,6 +474,29 @@ function formatBatchPurgeConfirmation(plan: BatchPurgePlan): string {
     colorize("dim", "This cannot be undone."),
     "",
   ].join("\n");
+}
+
+function formatBatchPurgeSelection(plan: BatchPurgePlan): string {
+  if (plan.source === "explicit") {
+    return `${plan.requestedCount} requested target(s)`;
+  }
+
+  return formatPurgeFilters(plan.filters ?? {});
+}
+
+function formatPurgeFilters(filters: PurgeFilterOptions): string {
+  const parts = [];
+  if (filters.cwd) {
+    parts.push(`cwd=${filters.cwd}`);
+  }
+  if (filters.grep) {
+    parts.push(`grep=${filters.grep}`);
+  }
+  if (filters.archived) {
+    parts.push("archived=true");
+  }
+
+  return parts.length > 0 ? parts.join(", ") : "filtered conversations";
 }
 
 function formatPurgeOrphansConfirmation(plan: PurgeOrphansPlan): string {

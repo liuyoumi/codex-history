@@ -6,12 +6,14 @@ import { doctorCommand } from "../src/commands/doctor.js";
 import { listCommand } from "../src/commands/list.js";
 import {
   executeBatchPurgePlanCommand,
+  hasPurgeFilter,
   planBatchPurgeCommand,
+  planFilteredPurgeCommand,
   planPurgeCommand,
   purgeCommand,
 } from "../src/commands/purge.js";
 import { executePurgeOrphansPlanCommand, planPurgeOrphansCommand } from "../src/commands/purge-orphans.js";
-import { SafetyRefusalError } from "../src/core/errors.js";
+import { SafetyRefusalError, UsageError } from "../src/core/errors.js";
 import { createCodexFixture } from "./helpers/fixture.js";
 
 describe("mvp commands", () => {
@@ -153,6 +155,71 @@ describe("mvp commands", () => {
       stateDb.close();
       logsDb.close();
     }
+  });
+
+  it("plans filtered purge by cwd", () => {
+    const fixture = createCodexFixture();
+    const plan = planFilteredPurgeCommand(fixture.paths, { cwd: "/tmp/project-a" });
+
+    expect(plan.source).toBe("filtered");
+    expect(plan.plans.map((item) => item.target.id)).toEqual(["thread-1"]);
+    expect(plan.filters).toEqual({ cwd: "/tmp/project-a" });
+  });
+
+  it("plans filtered purge with combined archived and cwd filters", () => {
+    const fixture = createCodexFixture();
+    const plan = planFilteredPurgeCommand(fixture.paths, { cwd: "/tmp/project-a", archived: true });
+
+    expect(plan.plans.map((item) => item.target.id)).toEqual(["thread-archived"]);
+  });
+
+  it("executes filtered purge for matching conversations", () => {
+    const fixture = createCodexFixture();
+    const plan = planFilteredPurgeCommand(fixture.paths, { cwd: "/tmp/project-a" });
+    const result = executeBatchPurgePlanCommand(fixture.paths, plan);
+
+    expect(result.verification.success).toBe(true);
+    expect(result.purgeReports).toHaveLength(1);
+
+    const stateDb = new Database(fixture.paths.stateDb, { readonly: true });
+    try {
+      const deleted = stateDb.prepare("select count(*) as count from threads where id = ?").get("thread-1") as {
+        count: number;
+      };
+      const keptArchived = stateDb
+        .prepare("select count(*) as count from threads where id = ?")
+        .get("thread-archived") as { count: number };
+
+      expect(deleted.count).toBe(0);
+      expect(keptArchived.count).toBe(1);
+    } finally {
+      stateDb.close();
+    }
+  });
+
+  it("refuses filtered purge before mutation when any target is active", () => {
+    const fixture = createCodexFixture();
+    process.env.CODEX_THREAD_ID = "thread-1";
+    const plan = planFilteredPurgeCommand(fixture.paths, { cwd: "/tmp/project-a" });
+
+    expect(() => executeBatchPurgePlanCommand(fixture.paths, plan)).toThrow(SafetyRefusalError);
+
+    const stateDb = new Database(fixture.paths.stateDb, { readonly: true });
+    try {
+      const row = stateDb.prepare("select count(*) as count from threads where id = ?").get("thread-1") as {
+        count: number;
+      };
+      expect(row.count).toBe(1);
+    } finally {
+      stateDb.close();
+    }
+  });
+
+  it("requires at least one purge filter for filtered purge planning", () => {
+    const fixture = createCodexFixture();
+
+    expect(hasPurgeFilter({})).toBe(false);
+    expect(() => planFilteredPurgeCommand(fixture.paths, {})).toThrow(UsageError);
   });
 
   it("refuses batch purge before mutation when any target is active", () => {

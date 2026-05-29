@@ -1,14 +1,24 @@
 import type { ResolvedPaths } from "../core/paths.js";
 import { executePurge, type PurgeExecutionReport } from "../core/executor.js";
+import { UsageError } from "../core/errors.js";
 import { buildPurgePlan, resolvePurgeTarget, type PurgePlan } from "../core/planner.js";
 import { validateSupportedDataModel } from "../core/schema.js";
+import { listThreads, type ListThreadsOptions } from "../core/threads.js";
 import { assertThreadIsNotActive, type ActiveThreadCheck } from "../safety/active-thread.js";
 import type { VerificationReport } from "../safety/verify.js";
 
+export type PurgeFilterOptions = {
+  cwd?: string;
+  grep?: string;
+  archived?: boolean;
+};
+
 export type BatchPurgePlan = {
   mode: "planned";
+  source: "explicit" | "filtered";
   requestedCount: number;
   plans: PurgePlan[];
+  filters?: PurgeFilterOptions;
   duplicateInputs: Array<{
     input: string;
     targetId: string;
@@ -49,10 +59,39 @@ export function planBatchPurgeCommand(paths: ResolvedPaths, threadIds: string[])
 
   return {
     mode: "planned",
+    source: "explicit",
     requestedCount: threadIds.length,
     plans,
     duplicateInputs,
   };
+}
+
+export function planFilteredPurgeCommand(paths: ResolvedPaths, filters: PurgeFilterOptions): BatchPurgePlan {
+  validateSupportedDataModel(paths);
+
+  if (!hasPurgeFilter(filters)) {
+    throw new UsageError("Provide thread id(s) or at least one filter such as --cwd, --grep, or --archived.");
+  }
+
+  const listOptions: ListThreadsOptions = {
+    cwd: filters.cwd,
+    grep: filters.grep,
+    archived: filters.archived,
+  };
+  const targets = listThreads(paths, listOptions);
+
+  return {
+    mode: "planned",
+    source: "filtered",
+    requestedCount: targets.length,
+    plans: targets.map((target) => buildPurgePlan(paths, target)),
+    filters,
+    duplicateInputs: [],
+  };
+}
+
+export function hasPurgeFilter(filters: PurgeFilterOptions): boolean {
+  return Boolean(filters.cwd || filters.grep || filters.archived);
 }
 
 export function executePurgePlanCommand(paths: ResolvedPaths, plan: PurgePlan) {

@@ -37,9 +37,18 @@ export function createCodexFixture(options: FixtureOptions = {}): Fixture {
     "27",
     "rollout-2026-05-27T11-00-00-thread-2.jsonl",
   );
+  const archivedRollout = path.join(
+    codexHome,
+    "sessions",
+    "2026",
+    "05",
+    "27",
+    "rollout-2026-05-27T09-30-00-thread-archived.jsonl",
+  );
 
   writeFileSync(firstRollout, JSON.stringify({ type: "session_meta" }) + "\n");
   writeFileSync(secondRollout, JSON.stringify({ type: "session_meta" }) + "\n");
+  writeFileSync(archivedRollout, JSON.stringify({ type: "session_meta" }) + "\n");
   writeFileSync(path.join(codexHome, "shell_snapshots", "thread-1.1.sh"), "pwd\n");
   writeFileSync(
     path.join(codexHome, "session_index.jsonl"),
@@ -47,6 +56,7 @@ export function createCodexFixture(options: FixtureOptions = {}): Fixture {
       JSON.stringify({ id: "thread-1", thread_name: "Delete Me", updated_at: "2026-05-27T10:00:00Z" }),
       JSON.stringify({ id: "thread-2", thread_name: "Keep Me", updated_at: "2026-05-27T11:00:00Z" }),
       JSON.stringify({ id: "thread-3", thread_name: "Delete Me", updated_at: "2026-05-27T12:00:00Z" }),
+      JSON.stringify({ id: "thread-archived", thread_name: "Archived Thread", updated_at: "2026-05-27T09:30:00Z" }),
     ].join("\n") + "\n",
   );
   writeFileSync(
@@ -62,7 +72,7 @@ export function createCodexFixture(options: FixtureOptions = {}): Fixture {
   );
   writeFileSync(path.join(codexHome, ".codex-global-state.json.bak"), "{}");
 
-  createStateDb(path.join(codexHome, "state_5.sqlite"), firstRollout, secondRollout);
+  createStateDb(path.join(codexHome, "state_5.sqlite"), firstRollout, secondRollout, archivedRollout);
   createLogsDb(path.join(codexHome, "logs_2.sqlite"));
   createGoalsDb(path.join(codexHome, "goals_1.sqlite"));
 
@@ -77,7 +87,7 @@ export function createCodexFixture(options: FixtureOptions = {}): Fixture {
   };
 }
 
-function createStateDb(filePath: string, firstRollout: string, secondRollout: string): void {
+function createStateDb(filePath: string, firstRollout: string, secondRollout: string, archivedRollout: string): void {
   const db = new Database(filePath);
   try {
     db.exec(`
@@ -173,6 +183,19 @@ function createStateDb(filePath: string, firstRollout: string, secondRollout: st
       1779865000000,
       1779864000000,
     );
+    insert.run(
+      "thread-archived",
+      archivedRollout,
+      1779859000,
+      1779860000,
+      "/tmp/project-a",
+      "Archived Thread",
+      "archived thread",
+      "archived preview",
+      1779860000000,
+      1779859000000,
+    );
+    db.prepare("update threads set archived = 1 where id = ?").run("thread-archived");
 
     db.prepare("insert into thread_dynamic_tools values (?, ?, ?, ?, ?)").run("thread-1", 0, "tool", "desc", "{}");
     db.prepare("insert into stage1_outputs values (?, ?, ?, ?, ?)").run("thread-1", 1, "memory", "summary", 1);
@@ -207,6 +230,7 @@ function addOrphanData(codexHome: string): void {
       JSON.stringify({ id: "thread-1", thread_name: "Delete Me", updated_at: "2026-05-27T10:00:00Z" }),
       JSON.stringify({ id: "thread-2", thread_name: "Keep Me", updated_at: "2026-05-27T11:00:00Z" }),
       JSON.stringify({ id: "thread-3", thread_name: "Delete Me", updated_at: "2026-05-27T12:00:00Z" }),
+      JSON.stringify({ id: "thread-archived", thread_name: "Archived Thread", updated_at: "2026-05-27T09:30:00Z" }),
       JSON.stringify({ id: "thread-orphan", thread_name: "Missing Rollout", updated_at: "2026-05-27T12:30:00Z" }),
       JSON.stringify({
         id: "thread-archived-orphan",

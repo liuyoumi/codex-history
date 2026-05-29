@@ -52,6 +52,8 @@ codex-history list
 codex-history list --grep "Astro"
 codex-history purge 019e6885
 codex-history purge 019e6885 019e6874
+codex-history purge --cwd /Users/me/Projects/example
+codex-history purge --grep "Astro"
 codex-history purge-orphans
 ```
 
@@ -77,6 +79,8 @@ Type 019e6885 to confirm:
 | `codex-history list` | 列出本地对话。 |
 | `codex-history list --grep <keyword>` | 按标题、id 或 cwd 过滤对话。 |
 | `codex-history purge <id...>` | 确认后删除一条或多条解析到的本地对话。 |
+| `codex-history purge --cwd <path>` | 确认后删除匹配工作目录的本地对话。 |
+| `codex-history purge --grep <keyword>` | 确认后删除匹配标题、id 或 cwd 的本地对话。 |
 | `codex-history purge-orphans` | 确认后清理本地孤儿数据。 |
 
 ### `doctor`
@@ -139,11 +143,23 @@ codex-history purge 019e6885 019e6874
 
 删除多个目标时，工具会先解析全部目标并展示批量计划；只要任意一个 id 不存在、不唯一，或命中 active thread，整个批量操作都会拒绝执行，不会部分删除。交互式批量删除需要输入 `purge-selected` 确认。
 
+也可以直接用过滤条件选择要删除的本地对话：
+
+```bash
+codex-history purge --cwd /Users/me/Projects/example
+codex-history purge --grep "Astro"
+codex-history purge --archived
+codex-history purge --cwd /Users/me/Projects/example --grep "Astro"
+```
+
+`--cwd`、`--grep`、`--archived` 可以组合，组合后只删除同时满足全部条件的对话。默认只匹配未归档对话；如果要删除已归档对话，请使用 `--archived`。过滤式删除会展示批量计划，并要求输入 `purge-selected` 确认。过滤条件不能和 id 同时使用。
+
 脚本或非交互环境可以使用 `--force`：
 
 ```bash
 codex-history purge 019e6885 --force
 codex-history purge 019e6885 019e6874 --force
+codex-history purge --cwd /Users/me/Projects/example --force
 ```
 
 `--force` 只跳过交互确认，不会跳过数据结构校验、active thread 保护和删除后的验证。

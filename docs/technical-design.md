@@ -77,6 +77,15 @@ Multi-target purge should use the same planning and mutation primitives, with th
 - require typing `purge-selected` before interactive batch deletion
 - summarize per-store row counts and aggregate verification failures after execution
 
+Filtered purge should use the same batch purge primitive after selecting threads with supported list filters:
+
+- accept `--cwd`, `--grep`, and `--archived`
+- combine filters as an intersection
+- reject filter mode with no filters
+- reject commands that mix explicit ids with filters
+- match non-archived conversations by default unless `--archived` is provided
+- require typing `purge-selected` before interactive filtered deletion
+
 ## Orphan Cleanup Strategy
 
 `purge-orphans` handles supported local data whose rollout file is already missing, plus logs-only records that no longer have a matching thread row.
@@ -183,6 +192,7 @@ Safety comes from:
 - resolving exactly one target before mutation
 - showing the resolved target before deletion
 - requiring short-id confirmation unless `--force` is used
+- requiring `purge-selected` confirmation for multi-target and filtered purge unless `--force` is used
 - refusing active threads when detectable
 - verifying supported stores after mutation
 

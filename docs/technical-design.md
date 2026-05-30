@@ -161,7 +161,7 @@ For `session_index.jsonl`:
 
 For `.codex-global-state.json` and `.bak`:
 
-- remove target thread id keys from known maps
+- remove object keys that contain the complete target thread id from known and unknown maps
 - remove target thread id values from known arrays
 - remove prompt-history entry for the target thread id
 
@@ -171,10 +171,11 @@ Known global-state keys observed during investigation:
 
 - `electron-persisted-atom-state.prompt-history`
 - `electron-persisted-atom-state.heartbeat-thread-permissions-by-id`
+- `composer-prompt-drafts-v1`
 - `projectless-thread-ids`
 - `thread-workspace-root-hints`
 
-Unknown keys should be left untouched unless they are structurally known containers whose key or array item exactly equals the target thread id.
+Unknown string values should be left untouched. Object containers may be traversed structurally, removing entries whose key contains the complete target thread id and array items that exactly equal the target thread id.
 
 ## File Mutations
 

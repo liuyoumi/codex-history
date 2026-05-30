@@ -8,6 +8,7 @@
 - matching line in `session_index.jsonl`
 - matching prompt history and thread state in `.codex-global-state.json`
 - matching prompt history and thread state in `.codex-global-state.json.bak`
+- matching prefixed global-state keys, such as composer drafts stored as `local:<threadId>`
 
 ## Should Remove
 

@@ -128,6 +128,7 @@ Execution behavior:
 - requires filtered targets to be listed from the supported `threads` store before mutation
 - deduplicates repeated inputs that resolve to the same thread
 - refuses the whole batch if any target appears active
+- removes global-state object keys that contain the complete target thread id, including prefixed keys such as `local:<threadId>`
 - runs verification after mutation
 
 `--force` skips only interactive confirmation. It does not skip schema validation, active-thread checks, or verification.

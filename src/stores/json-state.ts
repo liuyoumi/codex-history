@@ -74,7 +74,7 @@ function removeThreadReferences(value: unknown, threadId: string): { value: unkn
     const next: Record<string, unknown> = {};
 
     for (const [key, child] of Object.entries(value)) {
-      if (key === threadId) {
+      if (key.includes(threadId)) {
         changed = true;
         continue;
       }
@@ -89,4 +89,3 @@ function removeThreadReferences(value: unknown, threadId: string): { value: unkn
 
   return { value, changed: false };
 }
-

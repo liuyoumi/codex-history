@@ -170,6 +170,8 @@ codex-history purge --cwd /Users/me/Projects/example --force
 
 `--force` skips only interactive confirmation. It still keeps schema validation, active-thread protection, and post-purge verification.
 
+During deletion, `.codex-global-state.json` and `.codex-global-state.json.bak` are structurally rewritten to remove global-state keys that contain the target thread id, such as composer draft keys stored as `local:<threadId>`.
+
 ### `purge-orphans`
 
 Remove orphaned local data: conversations whose `state_5.sqlite.threads.rollout_path` points to a missing session or archived session file, and logs-only records that remain in `logs_2.sqlite.logs` without a matching thread in the `threads` table.

@@ -135,6 +135,32 @@ describe("mvp commands", () => {
     }
   });
 
+  it("removes prefixed thread id keys from global state during purge", () => {
+    const fixture = createCodexFixture();
+
+    for (const filePath of [fixture.paths.globalState, fixture.paths.globalStateBackup]) {
+      const state = JSON.parse(readFileSync(filePath, "utf8")) as Record<string, unknown>;
+      state["composer-prompt-drafts-v1"] = {
+        "local:thread-1": "draft text",
+        "local:thread-2": "kept draft",
+      };
+      writeFileSync(filePath, JSON.stringify(state, null, 2) + "\n");
+    }
+
+    const result = purgeCommand(fixture.paths, "thread-1");
+
+    expect("mode" in result && result.mode).toBe("executed");
+    if (!("mode" in result) || result.mode !== "executed") {
+      throw new Error("expected executed purge report");
+    }
+
+    expect(result.verification.success).toBe(true);
+    expect(readFileSync(fixture.paths.globalState, "utf8")).not.toContain("thread-1");
+    expect(readFileSync(fixture.paths.globalStateBackup, "utf8")).not.toContain("thread-1");
+    expect(readFileSync(fixture.paths.globalState, "utf8")).toContain("local:thread-2");
+    expect(readFileSync(fixture.paths.globalStateBackup, "utf8")).toContain("local:thread-2");
+  });
+
   it("plans batch purge with duplicate target inputs deduplicated", () => {
     const fixture = createCodexFixture();
     const plan = planBatchPurgeCommand(fixture.paths, ["thread-1", "thread-1"]);

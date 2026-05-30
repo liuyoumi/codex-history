@@ -170,6 +170,8 @@ codex-history purge --cwd /Users/me/Projects/example --force
 
 `--force` 只跳过交互确认，不会跳过数据结构校验、active thread 保护和删除后的验证。
 
+删除时会结构化重写 `.codex-global-state.json` 和 `.codex-global-state.json.bak`，移除包含目标 thread id 的全局状态键，例如输入草稿缓存里的 `local:<threadId>`。
+
 ### `purge-orphans`
 
 清理本地孤儿数据：包括 `state_5.sqlite.threads.rollout_path` 指向的 session / archived session 文件已经不存在的对话，以及只残留在 `logs_2.sqlite.logs` 中、但 `threads` 表里已经没有对应 thread 的日志记录。

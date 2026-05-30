@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Remove prefixed global-state keys that contain a purged thread id, such as composer draft keys stored as `local:<threadId>`.
+
 ## 0.5.0 - 2026-05-29
 
 ### Changed
